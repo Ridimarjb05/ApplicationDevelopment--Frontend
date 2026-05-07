@@ -6,7 +6,6 @@ const axiosClient = axios.create({
     headers: { "Content-Type": "application/json" },
 });
 
-// Optional: nicer error messages
 axiosClient.interceptors.response.use(
     (res) => res,
     (err) => {

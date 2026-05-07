@@ -1,11 +1,7 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { 
-  UserPlus, 
   Search, 
-  Mail, 
-  UserCircle, 
-  LayoutDashboard,
   LogOut 
 } from 'lucide-react';
 
@@ -22,11 +18,7 @@ const Sidebar = () => {
   };
 
   const menuItems = [
-    { name: 'Dashboard', path: '/', icon: LayoutDashboard },
-    { name: 'Customer Registration', path: '/register', icon: UserPlus },
-    { name: 'Staff Search', path: '/staff-search', icon: Search },
-    { name: 'Email Invoicing', path: '/send-invoice', icon: Mail },
-    { name: 'Customer Profile', path: '/profile', icon: UserCircle },
+    { name: 'Staff Search', path: '/', icon: Search },
   ];
 
   return (

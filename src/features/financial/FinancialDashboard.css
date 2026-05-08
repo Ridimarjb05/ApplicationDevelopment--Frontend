@@ -212,7 +212,38 @@ body {
   font-size: 1.3rem;
   font-weight: 700;
   color: #0f172a;
-  margin-bottom: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+/* shows if we are connected to backend or using demo data */
+.connection-banner {
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+.connection-banner.connected {
+  background: #dcfce7;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
+}
+
+.connection-banner.disconnected {
+  background: #fff7ed;
+  color: #c2410c;
+  border: 1px solid #fed7aa;
+}
+
+.loading-bar {
+  background: #eff6ff;
+  color: #3b82f6;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  margin-bottom: 1rem;
+  border: 1px solid #bfdbfe;
 }
 
 /* 3 stat cards at the top */

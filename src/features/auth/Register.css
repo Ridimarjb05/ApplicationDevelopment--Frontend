@@ -1,0 +1,83 @@
+﻿@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: "Inter", sans-serif; }
+
+.register-container { min-height: 100vh; display: flex; flex-direction: column; background: #fff; }
+
+.register-navbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.75rem 2rem; border-bottom: 1px solid #e2e8f0; background: #fff; z-index: 10;
+}
+.nav-left { display: flex; align-items: center; gap: 1.5rem; }
+.logo { font-weight: 700; font-size: 0.95rem; color: #0f172a; }
+.nav-left a { font-size: 0.8rem; color: #64748b; text-decoration: none; }
+.nav-left a:hover { color: #0f172a; }
+.system-status { font-size: 0.75rem; font-weight: 600; background: #0f172a; color: #fff; padding: 0.3rem 0.75rem; border-radius: 6px; }
+
+.register-content { display: flex; flex: 1; }
+
+.register-left {
+  width: 45%; display: flex; align-items: center; justify-content: center;
+  padding: 2rem; background: #fff;
+}
+
+.register-right {
+  width: 55%;
+  background: url("/signup-bg.png") center center / cover no-repeat;
+  position: relative; min-height: 500px;
+}
+
+.right-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(8,14,44,0.85) 0%, rgba(15,23,42,0.75) 100%);
+  display: flex; flex-direction: column; justify-content: center; padding: 3rem;
+}
+.right-overlay h1 { font-size: 1.8rem; font-weight: 700; color: #fff; line-height: 1.25; margin-bottom: 1rem; max-width: 380px; }
+.right-overlay p { font-size: 0.82rem; color: #94a3b8; line-height: 1.65; margin-bottom: 1.75rem; max-width: 360px; }
+
+.feature-list { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; }
+.feature-list li { display: flex; align-items: center; gap: 0.6rem; font-size: 0.84rem; color: #e2e8f0; }
+.check { width: 20px; height: 20px; background: #3b82f6; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; color: white; font-weight: 700; flex-shrink: 0; }
+
+.form-container { width: 100%; max-width: 360px; }
+.form-container h2 { font-size: 1.25rem; font-weight: 700; color: #0f172a; margin-bottom: 0.25rem; }
+.subtitle { font-size: 0.82rem; color: #64748b; margin-bottom: 1.5rem; }
+
+.error-box { background: #fef2f2; border: 1px solid #fca5a5; color: #dc2626; padding: 0.6rem 0.9rem; border-radius: 8px; font-size: 0.8rem; margin-bottom: 1rem; }
+
+.input-group {
+  display: flex; align-items: center;
+  border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc;
+  margin-bottom: 0.85rem; padding: 0 0.9rem; transition: border 0.15s;
+}
+.input-group:focus-within { border-color: #3b82f6; background: #fff; }
+.input-icon { font-size: 0.85rem; color: #94a3b8; margin-right: 0.5rem; flex-shrink: 0; }
+.input-group input { flex: 1; border: none; background: none; outline: none; padding: 0.65rem 0; font-size: 0.85rem; color: #0f172a; }
+.input-group input::placeholder { color: #94a3b8; }
+
+.password-group { position: relative; }
+.toggle-password { background: none; border: none; cursor: pointer; font-size: 0.75rem; color: #64748b; font-weight: 500; padding: 0; }
+
+.terms-label { display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.78rem; color: #64748b; margin-bottom: 1.25rem; cursor: pointer; line-height: 1.5; }
+.terms-label input { margin-top: 2px; cursor: pointer; }
+.terms-label a { color: #3b82f6; text-decoration: none; }
+.terms-label a:hover { text-decoration: underline; }
+
+.submit-btn {
+  width: 100%; padding: 0.7rem; background: #1e293b; color: white;
+  border: none; border-radius: 8px; font-size: 0.88rem; font-weight: 600;
+  cursor: pointer; transition: background 0.15s; margin-bottom: 1rem;
+}
+.submit-btn:hover:not(:disabled) { background: #0f172a; }
+.submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.have-account { font-size: 0.8rem; color: #64748b; text-align: center; }
+
+.register-footer {
+  border-top: 1px solid #e2e8f0; padding: 0.9rem 2rem;
+  display: flex; align-items: center; justify-content: space-between; background: #fff;
+}
+.register-footer p { font-size: 0.72rem; color: #94a3b8; }
+.footer-links { display: flex; gap: 1.25rem; }
+.footer-links a { font-size: 0.72rem; color: #94a3b8; text-decoration: none; }
+.footer-links a:hover { color: #0f172a; }

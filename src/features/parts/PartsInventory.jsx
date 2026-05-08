@@ -1,425 +1,246 @@
-import React, { useState, useEffect } from 'react';
-import { getAllParts, createPart, updatePart, deletePart, stockIn } from './partsAPI';
-import './PartsInventory.css';
+import React, { useState } from "react";
+import "./PartsInventory.css";
 
-// PartsInventory - Feature 3: Parts Inventory Management
-// this page shows all vehicle parts and lets admin do full CRUD
+// PartsInventory - Feature 3
+// shows the parts management page with inventory table
+// admin can view, add, edit and delete parts from this page
 function PartsInventory({ onNavigate, onLogout }) {
-  const [parts, setParts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchText, setSearchText] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("All Categories");
+  const [stockFilter, setStockFilter] = useState("All");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [showAddModal, setShowAddModal] = useState(false);
 
-  // modal state
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isStockModalOpen, setIsStockModalOpen] = useState(false);
-
-  // the part currently being edited or stocked
-  const [currentPart, setCurrentPart] = useState(null);
-  const [stockQty, setStockQty] = useState(1);
-
-  // form data for add/edit
-  const [formData, setFormData] = useState({
-    name: '', category: '', partNumber: '', price: '', stock: '', description: '', vendorID: 1, lowStockThreshold: 10,
-  });
-
-  const userName = localStorage.getItem('userName') || 'Admin';
-
-  // load all parts when page opens
-  useEffect(() => {
-    fetchParts();
-  }, []);
-
-  // call the API to get all parts
-  const fetchParts = async () => {
-    setLoading(true);
-    try {
-      const { ok, data } = await getAllParts();
-      if (ok) {
-        setParts(Array.isArray(data) ? data : []);
-      } else {
-        setError('Failed to load parts');
-      }
-    } catch (err) {
-      setError('Network error. Is the backend running?');
-    } finally {
-      setLoading(false);
-    }
+  const userName = localStorage.getItem("userName") || "Admin User";
+  const getInitials = (name) => {
+    const parts = name.trim().split(" ");
+    return (parts[0][0] + (parts[1] ? parts[1][0] : "")).toUpperCase();
   };
 
-  // update form when user types
-  const handleInputChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  // demo parts data - real app fetches this from the backend
+  const allParts = [
+    { sku: "AP-HD-9621", name: "Heavy-Duty Brake Caliper", category: "Braking System", categoryColor: "#f59e0b", price: 425.00, stock: 12, maxStock: 50, stockColor: "#f59e0b", barColor: "#f59e0b" },
+    { sku: "AP-EN-1644", name: "V8 Cylinder Head Gasket", category: "Engine Components", categoryColor: "#3b82f6", price: 84.95, stock: 142, maxStock: 200, stockColor: "#22c55e", barColor: "#22c55e" },
+    { sku: "AP-EL-5528", name: "High-Output Alternator 24V", category: "Electrical", categoryColor: "#8b5cf6", price: 620.00, stock: 54, maxStock: 100, stockColor: "#22c55e", barColor: "#22c55e" },
+    { sku: "AP-TR-3381", name: "Drive Shaft Coupler", category: "Transmission", categoryColor: "#64748b", price: 198.50, stock: 4, maxStock: 50, stockColor: "#ef4444", barColor: "#ef4444" },
+  ];
 
-  // open add modal with empty form
-  const openAddModal = () => {
-    setFormData({ name: '', category: '', partNumber: '', price: '', stock: '', description: '', vendorID: 1, lowStockThreshold: 10 });
-    setIsAddModalOpen(true);
-  };
-
-  // open edit modal with current part data
-  const openEditModal = (part) => {
-    setCurrentPart(part);
-    setFormData({
-      name: part.name,
-      category: part.category,
-      partNumber: part.partNumber,
-      price: part.price,
-      stock: part.stock,
-      description: part.description || '',
-      vendorID: part.vendorID || 1,
-      lowStockThreshold: part.lowStockThreshold || 10,
-    });
-    setIsEditModalOpen(true);
-  };
-
-  // open stock-in modal for a specific part
-  const openStockModal = (part) => {
-    setCurrentPart(part);
-    setStockQty(1);
-    setIsStockModalOpen(true);
-  };
-
-  // submit add part form
-  const handleAddSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const { ok, data } = await createPart({
-        ...formData,
-        price: parseFloat(formData.price),
-        stock: parseInt(formData.stock),
-        lowStockThreshold: parseInt(formData.lowStockThreshold),
-        vendorID: parseInt(formData.vendorID),
-      });
-      if (ok) {
-        setIsAddModalOpen(false);
-        fetchParts();
-      } else {
-        alert(data.message || 'Failed to add part');
-      }
-    } catch (err) {
-      alert('Network error');
-    }
-  };
-
-  // submit edit part form
-  const handleEditSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const { ok } = await updatePart(currentPart.partID, {
-        name: formData.name,
-        category: formData.category,
-        price: parseFloat(formData.price),
-        description: formData.description,
-      });
-      if (ok) {
-        setIsEditModalOpen(false);
-        fetchParts();
-      } else {
-        alert('Failed to update part');
-      }
-    } catch (err) {
-      alert('Network error');
-    }
-  };
-
-  // add stock to a part
-  const handleStockIn = async (e) => {
-    e.preventDefault();
-    try {
-      const { ok } = await stockIn(currentPart.partID, parseInt(stockQty));
-      if (ok) {
-        setIsStockModalOpen(false);
-        fetchParts();
-      } else {
-        alert('Failed to add stock');
-      }
-    } catch (err) {
-      alert('Network error');
-    }
-  };
-
-  // delete a part
-  const handleDelete = async (part) => {
-    if (!window.confirm(`Delete part: ${part.name}?`)) return;
-    try {
-      const { ok } = await deletePart(part.partID);
-      if (ok) {
-        fetchParts();
-      } else {
-        alert('Failed to delete part');
-      }
-    } catch (err) {
-      alert('Network error');
-    }
-  };
-
-  // logout
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('userName');
-    localStorage.removeItem('userRole');
-    onLogout();
-  };
-
-  // filter parts based on search input
-  const filteredParts = parts.filter(p =>
-    p.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    p.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    p.partNumber?.toLowerCase().includes(searchQuery.toLowerCase())
+  // filter based on search
+  const filtered = allParts.filter((p) =>
+    p.name.toLowerCase().includes(searchText.toLowerCase()) ||
+    p.sku.toLowerCase().includes(searchText.toLowerCase()) ||
+    p.category.toLowerCase().includes(searchText.toLowerCase())
   );
 
-  // show stock level color based on quantity
-  const getStockColor = (stock) => {
-    if (stock < 10) return '#ef4444';
-    if (stock < 30) return '#f59e0b';
-    return '#10b981';
-  };
-
-  // summary stats for the top cards
-  const totalParts = parts.length;
-  const lowStock = parts.filter(p => p.stock < 10).length;
-  const totalValue = parts.reduce((sum, p) => sum + (p.price * p.stock || 0), 0);
-
   return (
-    <div className="inventory-layout">
-      // sidebar navigation
-      <aside className="sidebar">
-        <div className="sidebar-header">
-          <h2>AUTOPART PRO</h2>
-          <p>AUTOMOTIVE MANAGEMENT</p>
+    <div className="parts-layout">
+      {/* sidebar */}
+      <aside className="parts-sidebar">
+        <div className="sidebar-brand">
+          <div className="brand-icon">AP</div>
+          <div>
+            <div className="brand-name">AUTOPART PRO</div>
+            <div className="brand-sub">WAREHOUSE MANAGEMENT</div>
+          </div>
         </div>
 
         <nav className="sidebar-nav">
-          <div className="nav-item active">
-            Dashboard / Inventory
-          </div>
-          // clicking staff goes to staff page
-          <div className="nav-item" onClick={() => onNavigate('staff')} style={{ cursor: 'pointer' }}>
-            Staff
-          </div>
-          <div className="nav-item">Financials</div>
-          <div className="nav-item">Vendors</div>
-          <div className="nav-item">Customers</div>
+          {[
+            { icon: "⊞", label: "Dashboard", page: "dashboard" },
+            { icon: "📦", label: "Inventory", page: "inventory", active: true },
+            { icon: "🛒", label: "Sales", page: "sales" },
+            { icon: "📊", label: "Reports", page: "reports" },
+            { icon: "⚙", label: "Settings", page: "settings" },
+          ].map((item) => (
+            <div key={item.label} className={`nav-item ${item.active ? "active" : ""}`} onClick={() => onNavigate && onNavigate(item.page)}>
+              <span className="nav-icon">{item.icon}</span>{item.label}
+            </div>
+          ))}
         </nav>
 
         <div className="sidebar-bottom">
-          <div className="nav-item">Settings</div>
-          <button className="logout-btn" onClick={handleLogout}>Logout</button>
+          <button className="add-sidebar-btn" onClick={() => setShowAddModal(true)}>+ Add New Part</button>
+          <button className="logout-btn" onClick={onLogout}><span className="nav-icon">↩</span>Logout</button>
         </div>
       </aside>
 
-      // main content
-      <main className="main-content">
-        <header className="topbar">
-          <div className="topbar-left">
-            <h1>Parts Inventory</h1>
-            // search bar
+      {/* main content */}
+      <div className="parts-main">
+        {/* top bar */}
+        <header className="parts-topbar">
+          <div className="topbar-title">Parts Inventory</div>
+          <div className="topbar-center">
             <div className="search-bar">
-              <input
-                type="text"
-                placeholder="Search parts..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
+              <span>🔍</span>
+              <input type="text" placeholder="Search inventory..." value={searchText} onChange={(e) => setSearchText(e.target.value)} />
             </div>
           </div>
           <div className="topbar-right">
-            <span className="user-name">{userName}</span>
+            <button className="icon-btn">🔔</button>
+            <button className="icon-btn">🕐</button>
+            <button className="icon-btn">❓</button>
+            <div className="user-info">
+              <div>
+                <div className="user-name">{userName}</div>
+                <div className="user-role-label">SENIOR LOGISTICS MANAGER</div>
+              </div>
+              <div className="user-avatar">{getInitials(userName)}</div>
+            </div>
           </div>
         </header>
 
-        <div className="dashboard-content">
-          // page header with add button
+        <div className="parts-body">
+          {/* page heading */}
           <div className="page-header">
             <div>
-              <h2>Parts Management</h2>
-              <p>Manage vehicle parts stock and pricing.</p>
+              <h1 className="page-title">Parts Management</h1>
+              <p className="page-subtitle">Real-time control over industrial vehicle components and stock levels.</p>
             </div>
-            <button className="btn-primary" onClick={openAddModal}>
-              Add New Part
-            </button>
-          </div>
-
-          // summary stat cards
-          <div className="stats-grid">
-            <div className="stat-card">
-              <span className="stat-label">TOTAL PARTS</span>
-              <h3 className="stat-value">{totalParts}</h3>
-            </div>
-            <div className="stat-card">
-              <span className="stat-label">LOW STOCK ALERTS</span>
-              <h3 className="stat-value" style={{ color: '#ef4444' }}>{lowStock}</h3>
-            </div>
-            <div className="stat-card">
-              <span className="stat-label">TOTAL STOCK VALUE</span>
-              <h3 className="stat-value">£{totalValue.toLocaleString()}</h3>
+            <div className="page-actions">
+              <button className="add-btn" onClick={() => setShowAddModal(true)}>+ Add New Part</button>
+              <button className="export-btn">↓ Export CSV</button>
             </div>
           </div>
 
-          // parts table
-          <div className="table-container">
-            {error && <p style={{ color: 'red', padding: '1rem' }}>{error}</p>}
+          {/* 4 stat cards */}
+          <div className="stat-cards">
+            <div className="stat-card">
+              <div className="stat-icon-box blue">📦</div>
+              <div>
+                <div className="stat-label">Total SKUs</div>
+                <div className="stat-value">4,281</div>
+                <div className="stat-change positive">↑12% from last month</div>
+              </div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-icon-box orange">⚠</div>
+              <div>
+                <div className="stat-label">Low Stock Items</div>
+                <div className="stat-value">24</div>
+                <div className="stat-change warning">Action required immediately</div>
+              </div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-icon-box teal">🚛</div>
+              <div>
+                <div className="stat-label">In Transit</div>
+                <div className="stat-value">118</div>
+                <div className="stat-change muted">Estimated arrival: 2 days</div>
+              </div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-icon-box green">💰</div>
+              <div>
+                <div className="stat-label">Inventory Value</div>
+                <div className="stat-value">$1.2M</div>
+                <div className="stat-change muted">Across 3 warehouses</div>
+              </div>
+            </div>
+          </div>
 
-            <table className="inventory-table">
+          {/* filters row */}
+          <div className="filters-row">
+            <div className="filter-group">
+              <select className="filter-select" value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}>
+                <option>All Categories</option>
+                <option>Braking System</option>
+                <option>Engine Components</option>
+                <option>Electrical</option>
+                <option>Transmission</option>
+              </select>
+              <select className="filter-select" value={stockFilter} onChange={(e) => setStockFilter(e.target.value)}>
+                <option>Stock Level: All</option>
+                <option>Low Stock</option>
+                <option>In Stock</option>
+                <option>Out of Stock</option>
+              </select>
+            </div>
+            <div className="showing-info">Showing 1-10 of 4,281</div>
+          </div>
+
+          {/* parts table */}
+          <div className="table-card">
+            <table className="parts-table">
               <thead>
                 <tr>
-                  <th>PART NAME</th>
-                  <th>PART NUMBER</th>
+                  <th>SKU ↕</th>
+                  <th>PART NAME ↕</th>
                   <th>CATEGORY</th>
-                  <th>PRICE</th>
-                  <th>STOCK</th>
+                  <th>UNIT PRICE</th>
+                  <th>STOCK LEVEL</th>
                   <th>ACTIONS</th>
                 </tr>
               </thead>
               <tbody>
-                {loading ? (
-                  <tr><td colSpan="6" style={{ textAlign: 'center', padding: '2rem' }}>Loading parts...</td></tr>
-                ) : filteredParts.length === 0 ? (
-                  <tr><td colSpan="6" style={{ textAlign: 'center', padding: '2rem' }}>No parts found.</td></tr>
-                ) : (
-                  filteredParts.map(part => (
-                    <tr key={part.partID}>
+                {filtered.map((part, i) => {
+                  const stockPct = Math.min((part.stock / part.maxStock) * 100, 100);
+                  return (
+                    <tr key={i}>
                       <td>
-                        <div>
-                          <span style={{ fontWeight: 600 }}>{part.name}</span>
-                          <p style={{ fontSize: '0.8rem', color: '#94a3b8', margin: 0 }}>{part.description}</p>
+                        <div className="sku-cell">
+                          <div className="sku-bar" style={{ background: part.barColor }}></div>
+                          <span className="sku-code">{part.sku}</span>
                         </div>
                       </td>
-                      <td style={{ fontFamily: 'monospace', color: '#64748b' }}>{part.partNumber}</td>
-                      <td>{part.category}</td>
-                      <td style={{ fontWeight: 600 }}>£{Number(part.price).toFixed(2)}</td>
+                      <td className="part-name">{part.name}</td>
                       <td>
-                        // show stock with a color indicator
-                        <span style={{ color: getStockColor(part.stock), fontWeight: 600 }}>
-                          {part.stock} units
+                        <span className="category-badge" style={{ color: part.categoryColor, background: part.categoryColor + "18" }}>
+                          {part.category}
                         </span>
                       </td>
-                      <td className="actions-cell">
-                        // stock in button
-                        <button onClick={() => openStockModal(part)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#10b981' }}>Stock In</button>
-                        // edit button
-                        <button onClick={() => openEditModal(part)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#3b82f6' }}>Edit</button>
-                        // delete button
-                        <button onClick={() => handleDelete(part)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444' }}>Delete</button>
+                      <td className="price">${part.price.toFixed(2)}</td>
+                      <td>
+                        <div className="stock-cell">
+                          <div className="stock-bar-bg">
+                            <div className="stock-bar-fill" style={{ width: `${stockPct}%`, background: part.stockColor }}></div>
+                          </div>
+                          <span className="stock-count" style={{ color: part.stockColor, background: part.stockColor + "18" }}>
+                            {part.stock} units
+                          </span>
+                        </div>
+                      </td>
+                      <td>
+                        <div className="action-btns">
+                          <button className="action-btn cart" title="Add to Order">🛒</button>
+                          <button className="action-btn" title="Edit">✏</button>
+                          <button className="action-btn danger" title="Delete">🗑</button>
+                        </div>
                       </td>
                     </tr>
-                  ))
-                )}
+                  );
+                })}
               </tbody>
             </table>
+
+            {/* pagination */}
+            <div className="pagination">
+              <button className="page-btn">Previous</button>
+              <button className="page-btn active">1</button>
+              <button className="page-btn">2</button>
+              <button className="page-btn">3</button>
+              <span className="page-dots">...</span>
+              <button className="page-btn">428</button>
+              <button className="page-btn">Next</button>
+            </div>
           </div>
         </div>
-      </main>
+      </div>
 
-      // add part modal
-      {isAddModalOpen && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h3>Add New Part</h3>
-              <button className="close-btn" onClick={() => setIsAddModalOpen(false)}>✕</button>
+      {/* add part modal */}
+      {showAddModal && (
+        <div className="modal-overlay" onClick={() => setShowAddModal(false)}>
+          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+            <h2>Add New Part</h2>
+            <p style={{ color: "#64748b", fontSize: "0.85rem", marginBottom: "0.75rem" }}>Enter the details of the new inventory part.</p>
+            <input className="modal-input" type="text" placeholder="Part Name" />
+            <input className="modal-input" type="text" placeholder="SKU Code (e.g. AP-BR-0001)" />
+            <input className="modal-input" type="text" placeholder="Category" />
+            <input className="modal-input" type="number" placeholder="Unit Price ($)" />
+            <input className="modal-input" type="number" placeholder="Stock Quantity" />
+            <div className="modal-actions">
+              <button className="modal-cancel" onClick={() => setShowAddModal(false)}>Cancel</button>
+              <button className="add-btn" onClick={() => setShowAddModal(false)}>Add Part</button>
             </div>
-            <form onSubmit={handleAddSubmit}>
-              <div className="modal-body">
-                <div className="form-group">
-                  <label>Part Name</label>
-                  <input required name="name" value={formData.name} onChange={handleInputChange} placeholder="e.g. Brake Pad" />
-                </div>
-                <div className="form-group">
-                  <label>Part Number</label>
-                  <input required name="partNumber" value={formData.partNumber} onChange={handleInputChange} placeholder="e.g. BP-2024-001" />
-                </div>
-                <div className="form-group">
-                  <label>Category</label>
-                  <input required name="category" value={formData.category} onChange={handleInputChange} placeholder="e.g. Brakes" />
-                </div>
-                <div className="form-group">
-                  <label>Price (£)</label>
-                  <input required type="number" step="0.01" name="price" value={formData.price} onChange={handleInputChange} />
-                </div>
-                <div className="form-group">
-                  <label>Initial Stock</label>
-                  <input required type="number" name="stock" value={formData.stock} onChange={handleInputChange} />
-                </div>
-                <div className="form-group">
-                  <label>Description</label>
-                  <input name="description" value={formData.description} onChange={handleInputChange} />
-                </div>
-              </div>
-              <div className="modal-footer">
-                <button type="button" className="btn-cancel" onClick={() => setIsAddModalOpen(false)}>Cancel</button>
-                <button type="submit" className="btn-submit">Add Part</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      // edit part modal
-      {isEditModalOpen && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h3>Edit Part</h3>
-              <button className="close-btn" onClick={() => setIsEditModalOpen(false)}>✕</button>
-            </div>
-            <form onSubmit={handleEditSubmit}>
-              <div className="modal-body">
-                <div className="form-group">
-                  <label>Part Name</label>
-                  <input required name="name" value={formData.name} onChange={handleInputChange} />
-                </div>
-                <div className="form-group">
-                  <label>Category</label>
-                  <input required name="category" value={formData.category} onChange={handleInputChange} />
-                </div>
-                <div className="form-group">
-                  <label>Price (£)</label>
-                  <input required type="number" step="0.01" name="price" value={formData.price} onChange={handleInputChange} />
-                </div>
-                <div className="form-group">
-                  <label>Description</label>
-                  <input name="description" value={formData.description} onChange={handleInputChange} />
-                </div>
-              </div>
-              <div className="modal-footer">
-                <button type="button" className="btn-cancel" onClick={() => setIsEditModalOpen(false)}>Cancel</button>
-                <button type="submit" className="btn-submit">Save Changes</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      // stock in modal
-      {isStockModalOpen && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h3>Add Stock — {currentPart?.name}</h3>
-              <button className="close-btn" onClick={() => setIsStockModalOpen(false)}>✕</button>
-            </div>
-            <form onSubmit={handleStockIn}>
-              <div className="modal-body">
-                <div className="form-group">
-                  <label>Quantity to Add</label>
-                  <input
-                    type="number"
-                    min="1"
-                    value={stockQty}
-                    onChange={(e) => setStockQty(e.target.value)}
-                    required
-                  />
-                </div>
-              </div>
-              <div className="modal-footer">
-                <button type="button" className="btn-cancel" onClick={() => setIsStockModalOpen(false)}>Cancel</button>
-                <button type="submit" className="btn-submit">Confirm Stock In</button>
-              </div>
-            </form>
           </div>
         </div>
       )}

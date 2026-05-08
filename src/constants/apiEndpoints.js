@@ -1,19 +1,21 @@
-// all backend API endpoint URLs are stored here
-// so if the URL changes we only update it in one place
+﻿// apiEndpoints.js - all backend API URLs in one place
+// this makes it easy to change the backend URL in one file
 
 const BASE_URL = 'http://localhost:5213';
 
 export const API_ENDPOINTS = {
   // auth endpoints
   LOGIN: `${BASE_URL}/api/auth/login`,
-  REGISTER: `${BASE_URL}/api/auth/register-customer`,
+  REGISTER: `${BASE_URL}/api/auth/register`,
 
-  // staff management endpoints (Feature 2)
-  STAFF_ALL: `${BASE_URL}/api/admin/staff`,
-  STAFF_BY_ID: (id) => `${BASE_URL}/api/admin/staff/${id}`,
+  // financial report endpoints (Feature 1)
+  FINANCIAL_REPORT: `${BASE_URL}/api/admin/reports/financial`,
+  MONTHLY_REVENUE: (year) => `${BASE_URL}/api/admin/reports/financial/monthly/${year}`,
+  TOP_PARTS: (count) => `${BASE_URL}/api/admin/reports/financial/top-parts?count=${count}`,
 
-  // parts inventory endpoints (Feature 3)
-  PARTS_ALL: `${BASE_URL}/api/admin/parts`,
-  PARTS_BY_ID: (id) => `${BASE_URL}/api/admin/parts/${id}`,
-  PARTS_STOCK_IN: (id) => `${BASE_URL}/api/admin/parts/${id}/stock-in`,
+  // staff endpoints (Feature 2)
+  STAFF: `${BASE_URL}/api/admin/staff`,
+
+  // parts endpoints (Feature 3)
+  PARTS: `${BASE_URL}/api/admin/parts`,
 };

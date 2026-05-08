@@ -1,375 +1,252 @@
-import React, { useState, useEffect } from 'react';
-import { getAllStaff, createStaff, updateStaff, deleteStaff } from './staffAPI';
-import './StaffDirectory.css';
+import React, { useState } from "react";
+import "./StaffDirectory.css";
 
-// StaffDirectory - Feature 2: Staff Management
-// this page shows all staff members and lets admin add, edit, or remove them
+// StaffDirectory - Feature 2
+// shows the staff management page with a table of all staff members
+// admin can view, edit and manage staff from this page
 function StaffDirectory({ onNavigate, onLogout }) {
-  const [staff, setStaff] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [searchText, setSearchText] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [showAddModal, setShowAddModal] = useState(false);
 
-  // modal visibility state
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const userName = localStorage.getItem("userName") || "Admin User";
 
-  // the staff member being edited
-  const [currentStaff, setCurrentStaff] = useState(null);
-
-  // form data for add and edit forms
-  const [formData, setFormData] = useState({
-    fullName: '', email: '', phoneNumber: '', role: 'Staff'
-  });
-
-  // shown after adding a staff member - their temporary password
-  const [tempPassword, setTempPassword] = useState('');
-
-  const userName = localStorage.getItem('userName') || 'Admin';
-
-  // load all staff when the page opens
-  useEffect(() => {
-    fetchStaff();
-  }, []);
-
-  // call the API to get all staff members
-  const fetchStaff = async () => {
-    setLoading(true);
-    try {
-      const { ok, data } = await getAllStaff();
-      if (ok) {
-        setStaff(Array.isArray(data) ? data : []);
-      } else {
-        setError('Failed to load staff');
-      }
-    } catch (err) {
-      setError('Network error connecting to backend.');
-    } finally {
-      setLoading(false);
-    }
+  // get initials from name for avatar
+  const getInitials = (name) => {
+    const parts = name.trim().split(" ");
+    return (parts[0][0] + (parts[1] ? parts[1][0] : "")).toUpperCase();
   };
 
-  // update form state when user types
-  const handleInputChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  // demo staff data - in real app this comes from the backend API
+  const staffList = [
+    { id: "ID #STF-0012", name: "Marcus Holloway", email: "marcus.h@vpsims.com", role: "Inventory Manager", roleColor: "#3b82f6", status: "Active", statusColor: "#22c55e", lastActive: "2 mins ago", avatar: "MH", avatarBg: "#6366f1" },
+    { id: "ID #STF-0075", name: "Sarah Chan", email: "s.chen@vpsims.com", role: "Financial Analyst", roleColor: "#8b5cf6", status: "Active", statusColor: "#22c55e", lastActive: "14 mins ago", avatar: "SC", avatarBg: "#ec4899" },
+    { id: "ID #STF-0078", name: "David Wilson", email: "d.wilson@vpsims.com", role: "Sales Rep", roleColor: "#f59e0b", status: "On Leave", statusColor: "#f59e0b", lastActive: "2 days ago", avatar: "DW", avatarBg: "#14b8a6" },
+    { id: "ID #STF-0021", name: "Jessica Martinez", email: "j.martinez@vpsims.com", role: "Floor Supervisor", roleColor: "#10b981", status: "Active", statusColor: "#22c55e", lastActive: "Just now", avatar: "JM", avatarBg: "#f97316" },
+    { id: "ID #STF-0034", name: "Alex Thompson", email: "a.thompson@vpsims.com", role: "Lead Mechanic", roleColor: "#64748b", status: "Offline", statusColor: "#94a3b8", lastActive: "3 hours ago", avatar: "AT", avatarBg: "#3b82f6" },
+  ];
 
-  // open the add staff modal
-  const openAddModal = () => {
-    setFormData({ fullName: '', email: '', phoneNumber: '', role: 'Staff' });
-    setTempPassword('');
-    setIsAddModalOpen(true);
-  };
-
-  // open the edit staff modal with current data filled in
-  const openEditModal = (member) => {
-    setCurrentStaff(member);
-    setFormData({
-      fullName: `${member.firstName} ${member.lastName}`,
-      email: member.email,
-      phoneNumber: member.phone,
-      role: member.position || 'Staff',
-    });
-    setIsEditModalOpen(true);
-  };
-
-  // submit add staff form
-  const handleAddSubmit = async (e) => {
-    e.preventDefault();
-    // split full name into first and last
-    const parts = formData.fullName.split(' ');
-    const firstName = parts[0] || 'Unknown';
-    const lastName = parts.slice(1).join(' ') || 'User';
-
-    const payload = {
-      firstName,
-      lastName,
-      email: formData.email,
-      phone: formData.phoneNumber,
-      position: formData.role,
-      password: 'TempPassword123!',
-      address: 'HQ',
-      hireDate: new Date().toISOString(),
-    };
-
-    try {
-      const { ok, data } = await createStaff(payload);
-      if (ok) {
-        // show the temporary password to the admin
-        setTempPassword('TempPassword123!');
-        fetchStaff();
-      } else {
-        alert(data.message || 'Failed to add staff');
-      }
-    } catch (err) {
-      alert('Network error');
-    }
-  };
-
-  // submit edit staff form
-  const handleEditSubmit = async (e) => {
-    e.preventDefault();
-    const parts = formData.fullName.split(' ');
-    const payload = {
-      firstName: parts[0] || 'Unknown',
-      lastName: parts.slice(1).join(' ') || 'User',
-      phone: formData.phoneNumber,
-      position: formData.role,
-    };
-
-    try {
-      const { ok } = await updateStaff(currentStaff.staffID, payload);
-      if (ok) {
-        setIsEditModalOpen(false);
-        fetchStaff();
-      } else {
-        alert('Failed to update staff');
-      }
-    } catch (err) {
-      alert('Network error');
-    }
-  };
-
-  // delete a staff member
-  const handleDelete = async (member) => {
-    if (!window.confirm(`Delete ${member.firstName} ${member.lastName}?`)) return;
-    try {
-      const { ok } = await deleteStaff(member.staffID);
-      if (ok) {
-        fetchStaff();
-      } else {
-        alert('Failed to delete staff');
-      }
-    } catch (err) {
-      alert('Network error');
-    }
-  };
-
-  // logout and clear local storage
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('userName');
-    localStorage.removeItem('userRole');
-    onLogout();
-  };
-
-  // get initials from first and last name for the avatar
-  const getInitials = (first, last) => {
-    if (!first) return 'U';
-    return (first[0] + (last ? last[0] : '')).toUpperCase();
-  };
-
-  // stats for the cards at the top
-  const totalStaff = staff.length;
-  const activeStaff = staff.filter(s => s.status === 'Active').length;
-  const admins = staff.filter(s => s.position === 'Admin').length;
+  // filter staff based on search input
+  const filtered = staffList.filter(
+    (s) =>
+      s.name.toLowerCase().includes(searchText.toLowerCase()) ||
+      s.email.toLowerCase().includes(searchText.toLowerCase()) ||
+      s.role.toLowerCase().includes(searchText.toLowerCase())
+  );
 
   return (
-    <div className="inventory-layout">
-      // sidebar navigation
-      <aside className="sidebar">
-        <div className="sidebar-header">
-          <h2>AUTOPART PRO</h2>
-          <p>AUTOMOTIVE MANAGEMENT</p>
+    <div className="staff-layout">
+      {/* dark sidebar */}
+      <aside className="staff-sidebar">
+        <div className="sidebar-brand">
+          <div className="brand-icon">VP</div>
+          <div>
+            <div className="brand-name">VPSIMS ADMIN</div>
+            <div className="brand-sub">AUTOMOTIVE MANAGEMENT</div>
+          </div>
         </div>
 
         <nav className="sidebar-nav">
-          <div className="nav-item" onClick={() => onNavigate('inventory')} style={{ cursor: 'pointer' }}>
-            Dashboard
-          </div>
-          <div className="nav-item" onClick={() => onNavigate('inventory')} style={{ cursor: 'pointer' }}>
-            Inventory
-          </div>
-          // staff is the active page
-          <div className="nav-item active">
-            Staff
-          </div>
-          <div className="nav-item">Financials</div>
-          <div className="nav-item">Vendors</div>
-          <div className="nav-item">Customers</div>
+          {[
+            { icon: "⊞", label: "Dashboard", page: "dashboard" },
+            { icon: "📦", label: "Inventory", page: "inventory" },
+            { icon: "👥", label: "Staff", page: "staff", active: true },
+            { icon: "💰", label: "Financials", page: "financial" },
+            { icon: "🏭", label: "Vendors", page: "vendors" },
+            { icon: "🧑‍💼", label: "Customers", page: "customers" },
+          ].map((item) => (
+            <div
+              key={item.label}
+              className={`nav-item ${item.active ? "active" : ""}`}
+              onClick={() => onNavigate && onNavigate(item.page)}
+            >
+              <span className="nav-icon">{item.icon}</span>
+              {item.label}
+            </div>
+          ))}
         </nav>
 
         <div className="sidebar-bottom">
-          <div className="nav-item">Settings</div>
-          <button className="logout-btn" onClick={handleLogout}>Logout</button>
+          <div className="nav-item"><span className="nav-icon">⚙</span>Settings</div>
+          <button className="logout-btn" onClick={onLogout}>
+            <span className="nav-icon">↩</span>Logout
+          </button>
         </div>
       </aside>
 
-      // main content area
-      <main className="main-content">
-        <header className="topbar">
+      {/* main content */}
+      <div className="staff-main">
+        {/* top bar */}
+        <header className="staff-topbar">
           <div className="topbar-left">
-            <h1>Staff Directory</h1>
+            <span className="topbar-brand">VPSIMS</span>
+            <div className="search-bar">
+              <span>🔍</span>
+              <input
+                type="text"
+                placeholder="Search staff..."
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+              />
+            </div>
           </div>
           <div className="topbar-right">
-            <span className="user-name">{userName}</span>
+            <button className="icon-btn">🔔</button>
+            <button className="icon-btn">❓</button>
+            <div className="user-info">
+              <div>
+                <div className="user-name">{userName}</div>
+                <div className="user-role-label">Super Admin</div>
+              </div>
+              <div className="user-avatar">{getInitials(userName)}</div>
+            </div>
           </div>
         </header>
 
-        <div className="dashboard-content">
-          // page title and add button
+        <div className="staff-body">
+          {/* page heading */}
           <div className="page-header">
             <div>
-              <h2>Staff Management</h2>
-              <p>Manage team access and roles.</p>
+              <h1 className="page-title">Staff Directory</h1>
+              <p className="page-subtitle">Manage organizational access and team roles.</p>
             </div>
-            <button className="btn-primary" onClick={openAddModal}>
-              Add New Staff
-            </button>
-          </div>
-
-          // stats cards
-          <div className="staff-stats-grid">
-            <div className="staff-stat-card">
-              <span className="staff-stat-title">TOTAL STAFF</span>
-              <h3 className="staff-stat-value">{totalStaff}</h3>
-            </div>
-            <div className="staff-stat-card">
-              <span className="staff-stat-title">ACTIVE</span>
-              <h3 className="staff-stat-value">{activeStaff}</h3>
-            </div>
-            <div className="staff-stat-card">
-              <span className="staff-stat-title">ADMINS</span>
-              <h3 className="staff-stat-value">{admins}</h3>
+            <div className="page-actions">
+              <button className="filter-btn">⚙ Filter</button>
+              <button className="add-btn" onClick={() => setShowAddModal(true)}>+ Add New Staff</button>
             </div>
           </div>
 
-          // staff table
-          <div className="table-container">
-            {error && <p style={{ color: 'red' }}>{error}</p>}
+          {/* 4 stat cards */}
+          <div className="stat-cards">
+            <div className="stat-card">
+              <div className="stat-icon-box blue">👥</div>
+              <div>
+                <div className="stat-label">TOTAL STAFF</div>
+                <div className="stat-value">42</div>
+              </div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-icon-box green">✅</div>
+              <div>
+                <div className="stat-label">ACTIVE NOW</div>
+                <div className="stat-value">18</div>
+              </div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-icon-box orange">📋</div>
+              <div>
+                <div className="stat-label">PENDING TASKS</div>
+                <div className="stat-value">7</div>
+              </div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-icon-box purple">🔑</div>
+              <div>
+                <div className="stat-label">ADMINS</div>
+                <div className="stat-value">5</div>
+              </div>
+            </div>
+          </div>
 
-            <table className="inventory-table">
+          {/* staff table */}
+          <div className="table-card">
+            <table className="staff-table">
               <thead>
                 <tr>
-                  <th>STAFF MEMBER</th>
-                  <th>EMAIL</th>
+                  <th>STAFF MEMBER ↕</th>
+                  <th>EMAIL ADDRESS</th>
                   <th>ROLE</th>
                   <th>STATUS</th>
+                  <th>LAST ACTIVE</th>
                   <th>ACTIONS</th>
                 </tr>
               </thead>
               <tbody>
-                {loading ? (
-                  <tr><td colSpan="5" style={{ textAlign: 'center', padding: '2rem' }}>Loading staff...</td></tr>
-                ) : staff.length === 0 ? (
-                  <tr><td colSpan="5" style={{ textAlign: 'center', padding: '2rem' }}>No staff members found.</td></tr>
-                ) : (
-                  staff.map(member => (
-                    <tr key={member.staffID}>
-                      <td>
-                        <div className="staff-avatar-cell">
-                          <div className="staff-avatar">
-                            {getInitials(member.firstName, member.lastName)}
-                          </div>
-                          <span>{member.firstName} {member.lastName}</span>
+                {filtered.map((staff, i) => (
+                  <tr key={i}>
+                    <td>
+                      <div className="staff-member-cell">
+                        <div className="staff-avatar" style={{ background: staff.avatarBg }}>
+                          {staff.avatar}
                         </div>
-                      </td>
-                      <td>{member.email}</td>
-                      <td><span className="role-badge">{member.position}</span></td>
-                      <td>
-                        <span className={member.status === 'Active' ? 'status-active' : 'status-inactive'}>
-                          {member.status}
-                        </span>
-                      </td>
-                      <td className="actions-cell">
-                        // edit button
-                        <button onClick={() => openEditModal(member)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#3b82f6' }}>Edit</button>
-                        // delete button
-                        <button onClick={() => handleDelete(member)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444' }}>Delete</button>
-                      </td>
-                    </tr>
-                  ))
-                )}
+                        <div>
+                          <div className="staff-name">{staff.name}</div>
+                          <div className="staff-id">{staff.id}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="staff-email">{staff.email}</td>
+                    <td>
+                      <span className="role-badge" style={{ color: staff.roleColor, background: staff.roleColor + "18" }}>
+                        {staff.role}
+                      </span>
+                    </td>
+                    <td>
+                      <span className="status-badge" style={{ color: staff.statusColor }}>
+                        ● {staff.status}
+                      </span>
+                    </td>
+                    <td className="last-active">{staff.lastActive}</td>
+                    <td>
+                      <div className="action-btns">
+                        <button className="action-btn" title="Edit">✏</button>
+                        <button className="action-btn" title="View">👁</button>
+                        <button className="action-btn danger" title="Delete">🗑</button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
+
+            {/* pagination */}
+            <div className="pagination">
+              <span className="pagination-info">Showing 1 to 5 of 42 entries</span>
+              <div className="pagination-btns">
+                <button className="page-btn">‹</button>
+                <button className="page-btn active">1</button>
+                <button className="page-btn">2</button>
+                <button className="page-btn">3</button>
+                <span className="page-dots">...</span>
+                <button className="page-btn">9</button>
+                <button className="page-btn">›</button>
+              </div>
+            </div>
+          </div>
+
+          {/* bottom cards */}
+          <div className="bottom-cards">
+            <div className="role-card">
+              <h3>System Role Definitions</h3>
+              <p>Update global permission sets for each staff level. These changes apply immediately to all active sessions.</p>
+              <button className="configure-btn">Configure Roles</button>
+            </div>
+            <div className="audit-card">
+              <div className="audit-icon">🔐</div>
+              <div>
+                <h3>Security Audit</h3>
+                <p>Review login logs and failed authentication attempts.</p>
+                <a href="#" className="view-logs">View Logs →</a>
+              </div>
+              <button className="audit-search-btn">🔍</button>
+            </div>
           </div>
         </div>
-      </main>
+      </div>
 
-      // add staff modal
-      {isAddModalOpen && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h3>{tempPassword ? 'Staff Created' : 'Add New Staff'}</h3>
-              <button className="close-btn" onClick={() => setIsAddModalOpen(false)}>✕</button>
+      {/* add staff modal */}
+      {showAddModal && (
+        <div className="modal-overlay" onClick={() => setShowAddModal(false)}>
+          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+            <h2>Add New Staff</h2>
+            <p style={{ color: "#64748b", fontSize: "0.85rem", marginBottom: "1rem" }}>Fill in the details to add a new staff member.</p>
+            <input className="modal-input" type="text" placeholder="Full Name" />
+            <input className="modal-input" type="email" placeholder="Email Address" />
+            <input className="modal-input" type="text" placeholder="Role (e.g. Inventory Manager)" />
+            <div className="modal-actions">
+              <button className="modal-cancel" onClick={() => setShowAddModal(false)}>Cancel</button>
+              <button className="add-btn" onClick={() => setShowAddModal(false)}>Add Staff</button>
             </div>
-
-            {tempPassword ? (
-              // show temp password after creating staff
-              <div className="modal-body">
-                <p>Temporary password for new staff member:</p>
-                <div style={{ fontFamily: 'monospace', background: '#dcfce3', padding: '0.5rem', borderRadius: '4px', margin: '1rem 0', fontSize: '1.1rem' }}>
-                  {tempPassword}
-                </div>
-                <p style={{ fontSize: '0.85rem', color: '#64748b' }}>Share this password securely with the staff member.</p>
-                <button className="btn-submit" style={{ width: '100%', marginTop: '1rem' }} onClick={() => setIsAddModalOpen(false)}>
-                  Close
-                </button>
-              </div>
-            ) : (
-              <form onSubmit={handleAddSubmit}>
-                <div className="modal-body">
-                  <div className="form-group">
-                    <label>Full Name</label>
-                    <input required name="fullName" value={formData.fullName} onChange={handleInputChange} placeholder="e.g. Jane Doe" />
-                  </div>
-                  <div className="form-group">
-                    <label>Email</label>
-                    <input required type="email" name="email" value={formData.email} onChange={handleInputChange} />
-                  </div>
-                  <div className="form-group">
-                    <label>Phone</label>
-                    <input required name="phoneNumber" value={formData.phoneNumber} onChange={handleInputChange} />
-                  </div>
-                  <div className="form-group">
-                    <label>Role</label>
-                    <select name="role" value={formData.role} onChange={handleInputChange}>
-                      <option value="Staff">Staff</option>
-                      <option value="Admin">Admin</option>
-                    </select>
-                  </div>
-                </div>
-                <div className="modal-footer">
-                  <button type="button" className="btn-cancel" onClick={() => setIsAddModalOpen(false)}>Cancel</button>
-                  <button type="submit" className="btn-submit">Create Staff</button>
-                </div>
-              </form>
-            )}
-          </div>
-        </div>
-      )}
-
-      // edit staff modal
-      {isEditModalOpen && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h3>Edit Staff</h3>
-              <button className="close-btn" onClick={() => setIsEditModalOpen(false)}>✕</button>
-            </div>
-            <form onSubmit={handleEditSubmit}>
-              <div className="modal-body">
-                <div className="form-group">
-                  <label>Full Name</label>
-                  <input required name="fullName" value={formData.fullName} onChange={handleInputChange} />
-                </div>
-                <div className="form-group">
-                  <label>Phone</label>
-                  <input required name="phoneNumber" value={formData.phoneNumber} onChange={handleInputChange} />
-                </div>
-                <div className="form-group">
-                  <label>Role</label>
-                  <select name="role" value={formData.role} onChange={handleInputChange}>
-                    <option value="Staff">Staff</option>
-                    <option value="Admin">Admin</option>
-                  </select>
-                </div>
-              </div>
-              <div className="modal-footer">
-                <button type="button" className="btn-cancel" onClick={() => setIsEditModalOpen(false)}>Cancel</button>
-                <button type="submit" className="btn-submit">Save Changes</button>
-              </div>
-            </form>
           </div>
         </div>
       )}

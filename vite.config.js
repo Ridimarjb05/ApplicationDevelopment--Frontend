@@ -1,10 +1,7 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
+﻿import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
 
-// vite config - this tells vite to use the react plugin
+// vite config file - tells vite how to build and run our react app
 export default defineConfig({
   plugins: [react()],
-  server: {
-    port: 5173,
-  },
-});
+})

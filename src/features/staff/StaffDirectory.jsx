@@ -1,257 +1,203 @@
-import React, { useState } from "react";
-import "./StaffDirectory.css";
+import { useState, useEffect } from 'react'
+import { getAllStaff, createStaff, deleteStaff } from './staffAPI'
 
-// StaffDirectory - Feature 2
-// shows the staff management page with a table of all staff members
-// admin can view, edit and manage staff from this page
-function StaffDirectory({ onNavigate, onLogout }) {
-  const [searchText, setSearchText] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [showAddModal, setShowAddModal] = useState(false);
+const ROLE_STYLES = {
+  Administrator:      { color: 'text-purple-700', bg: 'bg-purple-100' },
+  'Inventory Manager':{ color: 'text-blue-700',   bg: 'bg-blue-100'   },
+  'Sales Rep':        { color: 'text-sky-700',    bg: 'bg-sky-100'    },
+  Mechanic:           { color: 'text-orange-700', bg: 'bg-orange-100' },
+}
 
-  const userName = localStorage.getItem("userName") || "Admin User";
+export default function StaffDirectory() {
+  const [staffList, setStaffList] = useState([])
+  const [loading, setLoading]     = useState(true)
+  const [search, setSearch]       = useState('')
+  const [showModal, setShowModal] = useState(false)
+  const [form, setForm]           = useState({ firstName:'', lastName:'', email:'', password:'', phone:'', position:'Mechanic' })
+  const [saving, setSaving]       = useState(false)
+  const [error, setError]         = useState('')
 
-  // get initials from name for avatar
-  const getInitials = (name) => {
-    const parts = name.trim().split(" ");
-    return (parts[0][0] + (parts[1] ? parts[1][0] : "")).toUpperCase();
-  };
+  async function fetchStaff() {
+    setLoading(true)
+    try   { const res = await getAllStaff(); setStaffList(res.data) }
+    catch { setError('Failed to load staff. Make sure the backend is running.') }
+    finally { setLoading(false) }
+  }
 
-  // demo staff data - in real app this comes from the backend API
-  const staffList = [
-    { id: "ID #STF-0012", name: "Marcus Holloway", email: "marcus.h@vpsims.com", role: "Inventory Manager", roleColor: "#3b82f6", status: "Active", statusColor: "#22c55e", lastActive: "2 mins ago", avatar: "MH", avatarBg: "#6366f1" },
-    { id: "ID #STF-0075", name: "Sarah Chan", email: "s.chen@vpsims.com", role: "Financial Analyst", roleColor: "#8b5cf6", status: "Active", statusColor: "#22c55e", lastActive: "14 mins ago", avatar: "SC", avatarBg: "#ec4899" },
-    { id: "ID #STF-0078", name: "David Wilson", email: "d.wilson@vpsims.com", role: "Sales Rep", roleColor: "#f59e0b", status: "On Leave", statusColor: "#f59e0b", lastActive: "2 days ago", avatar: "DW", avatarBg: "#14b8a6" },
-    { id: "ID #STF-0021", name: "Jessica Martinez", email: "j.martinez@vpsims.com", role: "Floor Supervisor", roleColor: "#10b981", status: "Active", statusColor: "#22c55e", lastActive: "Just now", avatar: "JM", avatarBg: "#f97316" },
-    { id: "ID #STF-0034", name: "Alex Thompson", email: "a.thompson@vpsims.com", role: "Lead Mechanic", roleColor: "#64748b", status: "Offline", statusColor: "#94a3b8", lastActive: "3 hours ago", avatar: "AT", avatarBg: "#3b82f6" },
-  ];
+  useEffect(() => { fetchStaff() }, [])
 
-  // filter staff based on search input
-  const filtered = staffList.filter(
-    (s) =>
-      s.name.toLowerCase().includes(searchText.toLowerCase()) ||
-      s.email.toLowerCase().includes(searchText.toLowerCase()) ||
-      s.role.toLowerCase().includes(searchText.toLowerCase())
-  );
+  async function handleAdd(e) {
+    e.preventDefault(); setSaving(true)
+    try {
+      await createStaff({ ...form, address: 'N/A', hireDate: new Date().toISOString() })
+      fetchStaff()
+      setShowModal(false)
+      setForm({ firstName:'', lastName:'', email:'', password:'', phone:'', position:'Mechanic' })
+    } catch (err) { setError(err.response?.data?.message || 'Failed to create staff.') }
+    finally { setSaving(false) }
+  }
+
+  async function handleDelete(id) {
+    if (!confirm('Delete this staff member?')) return
+    try   { await deleteStaff(id); fetchStaff() }
+    catch { setError('Failed to delete.') }
+  }
+
+  const filtered = staffList.filter(s =>
+    `${s.firstName} ${s.lastName}`.toLowerCase().includes(search.toLowerCase()) ||
+    s.email.toLowerCase().includes(search.toLowerCase())
+  )
 
   return (
-    <div className="staff-layout">
-      {/* dark sidebar */}
-      <aside className="staff-sidebar">
-        <div className="sidebar-brand">
-          <div className="brand-icon">VP</div>
-          <div>
-            <div className="brand-name">VPSIMS ADMIN</div>
-            <div className="brand-sub">AUTOMOTIVE MANAGEMENT</div>
-          </div>
+    <div className="p-8">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Staff Registry</h1>
+          <p className="text-slate-500 text-sm mt-0.5">Manage roles and registration status</p>
         </div>
+        <button onClick={() => setShowModal(true)}
+          className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-lg text-sm font-semibold hover:bg-slate-700 transition-colors">
+          + Register New Staff
+        </button>
+      </div>
 
-        <nav className="sidebar-nav">
-          {[
-            { icon: "⊞", label: "Dashboard", page: "dashboard" },
-            { icon: "📦", label: "Inventory", page: "inventory" },
-            { icon: "👥", label: "Staff", page: "staff", active: true },
-            { icon: "💰", label: "Financials", page: "financial" },
-            { icon: "🏭", label: "Vendors", page: "vendors" },
-            { icon: "🧑‍💼", label: "Customers", page: "customers" },
-          ].map((item) => (
-            <div
-              key={item.label}
-              className={`nav-item ${item.active ? "active" : ""}`}
-              onClick={() => onNavigate && onNavigate(item.page)}
-            >
-              <span className="nav-icon">{item.icon}</span>
-              {item.label}
-            </div>
-          ))}
-        </nav>
+      {/* Stat Cards */}
+      <div className="grid grid-cols-4 gap-4 mb-6">
+        {[
+          { label: 'TOTAL STAFF', value: staffList.length },
+          { label: 'ACTIVE',      value: staffList.filter(s => s.status === 'Active').length },
+          { label: 'MECHANICS',   value: staffList.filter(s => s.position === 'Mechanic').length },
+          { label: 'MANAGERS',    value: staffList.filter(s => s.position === 'Inventory Manager').length },
+        ].map(card => (
+          <div key={card.label} className="bg-white border border-slate-200 rounded-xl p-5">
+            <p className="text-xs font-semibold text-slate-400 tracking-wide mb-1">{card.label}</p>
+            <p className="text-2xl font-bold text-slate-900">{loading ? '...' : card.value}</p>
+          </div>
+        ))}
+      </div>
 
-        <div className="sidebar-bottom">
-          <div className="nav-item"><span className="nav-icon">⚙</span>Settings</div>
-          <button className="logout-btn" onClick={onLogout}>
-            <span className="nav-icon">↩</span>Logout
-          </button>
+      {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+
+      {/* Table */}
+      <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
+          <h3 className="font-semibold text-slate-900">Staff Directory</h3>
+          <input type="text" placeholder="Search name or email…" value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="px-3 py-1.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-64" />
         </div>
-      </aside>
-
-      {/* main content */}
-      <div className="staff-main">
-        {/* top bar */}
-        <header className="staff-topbar">
-          <div className="topbar-left">
-            <span className="topbar-brand">VPSIMS</span>
-            <div className="search-bar">
-              <span>🔍</span>
-              <input
-                type="text"
-                placeholder="Search staff..."
-                value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
-              />
-            </div>
-          </div>
-          <div className="topbar-right">
-            <button className="icon-btn">🔔</button>
-            <button className="icon-btn">❓</button>
-            <div className="user-info">
-              <div>
-                <div className="user-name">{userName}</div>
-                <div className="user-role-label">Super Admin</div>
-              </div>
-              <div className="user-avatar">{getInitials(userName)}</div>
-            </div>
-          </div>
-        </header>
-
-        <div className="staff-body">
-          {/* page heading */}
-          <div className="page-header">
-            <div>
-              <h1 className="page-title">Staff Directory</h1>
-              <p className="page-subtitle">Manage organizational access and team roles.</p>
-            </div>
-            <div className="page-actions">
-              <button className="filter-btn">⚙ Filter</button>
-              <button className="add-btn" onClick={() => setShowAddModal(true)}>+ Add New Staff</button>
-            </div>
-          </div>
-
-          {/* 4 stat cards */}
-          <div className="stat-cards">
-            <div className="stat-card">
-              <div className="stat-icon-box blue">👥</div>
-              <div>
-                <div className="stat-label">TOTAL STAFF</div>
-                <div className="stat-value">42</div>
-              </div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-icon-box green">✅</div>
-              <div>
-                <div className="stat-label">ACTIVE NOW</div>
-                <div className="stat-value">18</div>
-              </div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-icon-box orange">📋</div>
-              <div>
-                <div className="stat-label">PENDING TASKS</div>
-                <div className="stat-value">7</div>
-              </div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-icon-box purple">🔑</div>
-              <div>
-                <div className="stat-label">ADMINS</div>
-                <div className="stat-value">5</div>
-              </div>
-            </div>
-          </div>
-
-          {/* staff table */}
-          <div className="table-card">
-            <table className="staff-table">
-              <thead>
-                <tr>
-                  <th>STAFF MEMBER ↕</th>
-                  <th>EMAIL ADDRESS</th>
-                  <th>ROLE</th>
-                  <th>STATUS</th>
-                  <th>LAST ACTIVE</th>
-                  <th>ACTIONS</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((staff, i) => (
-                  <tr key={i}>
-                    <td>
-                      <div className="staff-member-cell">
-                        <div className="staff-avatar" style={{ background: staff.avatarBg }}>
-                          {staff.avatar}
-                        </div>
-                        <div>
-                          <div className="staff-name">{staff.name}</div>
-                          <div className="staff-id">{staff.id}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="staff-email">{staff.email}</td>
-                    <td>
-                      <span className="role-badge" style={{ color: staff.roleColor, background: staff.roleColor + "18" }}>
-                        {staff.role}
-                      </span>
-                    </td>
-                    <td>
-                      <span className="status-badge" style={{ color: staff.statusColor }}>
-                        ● {staff.status}
-                      </span>
-                    </td>
-                    <td className="last-active">{staff.lastActive}</td>
-                    <td>
-                      <div className="action-btns">
-                        <button className="action-btn" title="Edit">✏</button>
-                        <button className="action-btn" title="View">👁</button>
-                        <button className="action-btn danger" title="Delete">🗑</button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-
-            {/* pagination */}
-            <div className="pagination">
-              <span className="pagination-info">Showing 1 to 5 of 42 entries</span>
-              <div className="pagination-btns">
-                <button className="page-btn">‹</button>
-                <button className="page-btn active">1</button>
-                <button className="page-btn">2</button>
-                <button className="page-btn">3</button>
-                <span className="page-dots">...</span>
-                <button className="page-btn">9</button>
-                <button className="page-btn">›</button>
-              </div>
-            </div>
-          </div>
-
-          {/* bottom cards */}
-          <div className="bottom-cards">
-            <div className="role-card">
-              <h3>System Role Definitions</h3>
-              <p>Update global permission sets for each staff level. These changes apply immediately to all active sessions.</p>
-              <button className="configure-btn">Configure Roles</button>
-            </div>
-            <div className="audit-card">
-              <div className="audit-icon">🔐</div>
-              <div>
-                <h3>Security Audit</h3>
-                <p>Review login logs and failed authentication attempts.</p>
-                <a href="#" className="view-logs">View Logs →</a>
-              </div>
-              <button className="audit-search-btn">🔍</button>
-            </div>
-          </div>
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="bg-slate-50 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+              <th className="text-left px-6 py-3">Name</th>
+              <th className="text-left px-6 py-3">Email</th>
+              <th className="text-left px-6 py-3">Role</th>
+              <th className="text-left px-6 py-3">Status</th>
+              <th className="text-left px-6 py-3">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {loading
+              ? <tr><td colSpan={5} className="text-center py-10 text-slate-400">Loading…</td></tr>
+              : filtered.length === 0
+                ? <tr><td colSpan={5} className="text-center py-10 text-slate-400">No staff found.</td></tr>
+                : filtered.map(s => {
+                    const style = ROLE_STYLES[s.position] || { color:'text-slate-700', bg:'bg-slate-100' }
+                    const name  = `${s.firstName} ${s.lastName}`.trim()
+                    const ini   = name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2)
+                    return (
+                      <tr key={s.staffID} className="border-t border-slate-100 hover:bg-slate-50">
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-9 h-9 rounded-full bg-slate-200 flex items-center justify-center text-slate-600 text-xs font-bold">{ini}</div>
+                            <div>
+                              <p className="font-semibold text-slate-900">{name}</p>
+                              <p className="text-xs text-slate-400">ID: #PA-{1000 + s.staffID}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-slate-500">{s.email}</td>
+                        <td className="px-6 py-4">
+                          <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${style.bg} ${style.color}`}>{s.position}</span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className={`text-sm font-medium ${s.status === 'Active' ? 'text-green-600' : 'text-amber-500'}`}>
+                            ● {s.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <button onClick={() => handleDelete(s.staffID)}
+                            className="text-red-400 hover:text-red-600 text-xs font-semibold">Delete</button>
+                        </td>
+                      </tr>
+                    )
+                  })
+            }
+          </tbody>
+        </table>
+        <div className="px-6 py-3 border-t border-slate-100 text-xs text-slate-400">
+          Showing {filtered.length} of {staffList.length} staff
         </div>
       </div>
 
-      {/* add staff modal */}
-      {showAddModal && (
-        <div className="modal-overlay" onClick={() => setShowAddModal(false)}>
-          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
-            <h2>Add New Staff</h2>
-            <p style={{ color: "#64748b", fontSize: "0.85rem", marginBottom: "1rem" }}>Fill in the details to add a new staff member.</p>
-            <input className="modal-input" type="text" placeholder="Full Name" />
-            <input className="modal-input" type="email" placeholder="Email Address" />
-            <input className="modal-input" type="text" placeholder="Role (e.g. Inventory Manager)" />
-            <div className="modal-actions">
-              <button className="modal-cancel" onClick={() => setShowAddModal(false)}>Cancel</button>
-              <button className="add-btn" onClick={() => setShowAddModal(false)}>Add Staff</button>
-            </div>
+      {/* Add Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-slate-900/50 flex items-center justify-center z-50"
+          onClick={() => setShowModal(false)}>
+          <div className="bg-white rounded-2xl p-8 w-full max-w-md shadow-xl"
+            onClick={e => e.stopPropagation()}>
+            <h2 className="text-xl font-bold text-slate-900 mb-5">Register New Staff</h2>
+            <form onSubmit={handleAdd} className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-semibold text-slate-600 block mb-1">First Name</label>
+                  <input required value={form.firstName} onChange={e => setForm({...form, firstName:e.target.value})}
+                    className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="John" />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-slate-600 block mb-1">Last Name</label>
+                  <input value={form.lastName} onChange={e => setForm({...form, lastName:e.target.value})}
+                    className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Doe" />
+                </div>
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-slate-600 block mb-1">Email</label>
+                <input required type="email" value={form.email} onChange={e => setForm({...form, email:e.target.value})}
+                  className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-slate-600 block mb-1">Password</label>
+                <input required value={form.password} onChange={e => setForm({...form, password:e.target.value})}
+                  className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Staff@123" />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-semibold text-slate-600 block mb-1">Phone</label>
+                  <input value={form.phone} onChange={e => setForm({...form, phone:e.target.value})}
+                    className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-slate-600 block mb-1">Position</label>
+                  <select value={form.position} onChange={e => setForm({...form, position:e.target.value})}
+                    className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                    <option>Administrator</option><option>Inventory Manager</option>
+                    <option>Sales Rep</option><option>Mechanic</option>
+                  </select>
+                </div>
+              </div>
+              <div className="flex justify-end gap-3 pt-2">
+                <button type="button" onClick={() => setShowModal(false)}
+                  className="px-4 py-2 border border-slate-300 rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
+                <button type="submit" disabled={saving}
+                  className="px-5 py-2 bg-slate-900 text-white rounded-lg text-sm font-semibold hover:bg-slate-700 disabled:opacity-50">
+                  {saving ? 'Saving…' : 'Register Staff'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
     </div>
-  );
+  )
 }
-
-export default StaffDirectory;

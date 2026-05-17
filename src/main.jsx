@@ -1,12 +1,13 @@
-﻿import React from 'react'
+import React from 'react'
 import ReactDOM from 'react-dom/client'
+import { BrowserRouter } from 'react-router-dom'
 import App from './App.jsx'
-import './App.css'
+import './index.css'
 
-// main.jsx - this is the starting point of our react app
-// it mounts the App component into the div#root in index.html
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <App />
-  </React.StrictMode>,
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
+  </React.StrictMode>
 )

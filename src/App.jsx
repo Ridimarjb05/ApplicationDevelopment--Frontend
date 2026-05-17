@@ -1,20 +1,13 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route } from 'react-router-dom'
 import Layout from './components/layout/Layout'
-import StaffDirectory from './features/staff/StaffDirectory'
-
-function PrivateRoute({ children }) {
-  const token = localStorage.getItem('token')
-  return token ? children : <Navigate to="/login" replace />
-}
+import StaffDirectory from './pages/staff/StaffDirectory'
 
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<PrivateRoute><Layout /></PrivateRoute>}>
-        <Route index element={<Navigate to="/staff" replace />} />
+      <Route path="/" element={<Layout />}>
         <Route path="staff" element={<StaffDirectory />} />
       </Route>
-      <Route path="*" element={<Navigate to="/staff" replace />} />
     </Routes>
   )
 }

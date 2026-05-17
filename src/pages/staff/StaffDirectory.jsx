@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { getAllStaff, createStaff, deleteStaff } from './staffAPI'
+import { getAllStaff, createStaff, deleteStaff } from '../../services/staffAPI'
 
 const ROLE_STYLES = {
   Administrator:      { color: 'text-purple-700', bg: 'bg-purple-100' },
@@ -50,7 +50,6 @@ export default function StaffDirectory() {
 
   return (
     <div className="p-8">
-      {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Staff Registry</h1>
@@ -62,7 +61,6 @@ export default function StaffDirectory() {
         </button>
       </div>
 
-      {/* Stat Cards */}
       <div className="grid grid-cols-4 gap-4 mb-6">
         {[
           { label: 'TOTAL STAFF', value: staffList.length },
@@ -79,7 +77,6 @@ export default function StaffDirectory() {
 
       {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
 
-      {/* Table */}
       <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
           <h3 className="font-semibold text-slate-900">Staff Directory</h3>
@@ -141,7 +138,6 @@ export default function StaffDirectory() {
         </div>
       </div>
 
-      {/* Add Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-slate-900/50 flex items-center justify-center z-50"
           onClick={() => setShowModal(false)}>

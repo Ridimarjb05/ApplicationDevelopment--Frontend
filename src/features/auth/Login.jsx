@@ -1,91 +1,134 @@
-﻿import React, { useState } from "react";
-import { loginUser } from "./authAPI";
-import "./Login.css";
+import { useState } from 'react'
+import { useNavigate, Link } from 'react-router-dom'
+import { login } from './authAPI'
 
-function Login({ onNavigate }) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+// ✅ Uses useNavigate() from react-router-dom — NOT onNavigate prop
+export default function Login() {
+  const navigate = useNavigate()
+  const [email, setEmail]           = useState('')
+  const [password, setPassword]     = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [error, setError]           = useState('')
+  const [loading, setLoading]       = useState(false)
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
+  async function handleLogin(e) {
+    e.preventDefault()
+    setError('')
+    setLoading(true)
     try {
-      const { ok, data } = await loginUser(email, password);
-      if (!ok) {
-        setError(data.message || "Invalid email or password");
-      } else {
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("userName", data.fullName);
-        localStorage.setItem("userRole", data.role || "USER");
-        onNavigate("dashboard");
-      }
+      const res = await login({ email, password })
+      localStorage.setItem('token',    res.data.token)
+      localStorage.setItem('userName', res.data.fullName || res.data.email)
+      localStorage.setItem('userRole', res.data.role || 'staff')
+      navigate('/staff')                          // ← react-router navigation
     } catch (err) {
-      setError("Network error. Is your .NET backend running?");
+      setError(err.response?.data?.message || 'Invalid email or password.')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   return (
-    <div className="login-container">
-      <nav className="login-navbar">
-        <div className="nav-left">
-          <span className="logo">AutoPart Pro</span>
-          <a href="#">Support</a>
-          <a href="#">Documentation</a>
-        </div>
-        <div className="nav-right">
-          <span className="system-status">System Status</span>
-        </div>
-      </nav>
-      <div className="login-content">
-        <div className="login-left">
-          <div className="left-overlay">
-            <h1>Precision Inventory Management.</h1>
-            <p>The industrial-grade solution for modern warehouse operations.</p>
-            <div className="stats-row">
-              <div className="stat"><h3>99.9%</h3><span>Uptime</span></div>
-              <div className="stat"><h3>2.4M</h3><span>SKUs Managed</span></div>
+    <div className="min-h-screen flex">
+      {/* Left panel */}
+      <div className="hidden lg:flex lg:w-1/2 bg-slate-900 relative flex-col justify-end p-12">
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-blue-900 opacity-90" />
+        <div className="relative z-10 text-white">
+          <h1 className="text-4xl font-bold mb-3">Precision Auto</h1>
+          <p className="text-slate-300 text-lg mb-8">Vehicle Parts Management System</p>
+          <div className="flex gap-8">
+            <div>
+              <p className="text-3xl font-bold text-blue-400">99.9%</p>
+              <p className="text-slate-400 text-sm">Uptime</p>
+            </div>
+            <div>
+              <p className="text-3xl font-bold text-blue-400">2.4M</p>
+              <p className="text-slate-400 text-sm">SKUs Managed</p>
             </div>
           </div>
         </div>
-        <div className="login-right">
-          <div className="form-container">
-            <h2>Welcome back</h2>
-            <p className="subtitle">Access your automotive inventory dashboard</p>
-            {error && <div className="error-box">{error}</div>}
-            <form onSubmit={handleLogin}>
-              <div className="input-group">
-                <input type="email" placeholder="Email Address" value={email} onChange={(e) => setEmail(e.target.value)} required />
+      </div>
+
+      {/* Right — form */}
+      <div className="flex-1 flex items-center justify-center bg-white px-8 py-12">
+        <div className="w-full max-w-md">
+          <h2 className="text-2xl font-bold text-slate-900 mb-1">Welcome back</h2>
+          <p className="text-slate-500 text-sm mb-8">Access your automotive inventory dashboard</p>
+
+          {error && (
+            <div className="mb-4 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleLogin} className="space-y-5">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+              <input
+                type="email"
+                required
+                placeholder="admin@autopartpro.com"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Password</label>
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-16"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-700 font-medium"
+                >
+                  {showPassword ? 'Hide' : 'Show'}
+                </button>
               </div>
-              <div className="input-group password-group">
-                <input type={showPassword ? "text" : "password"} placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-                <button type="button" className="toggle-password" onClick={() => setShowPassword(!showPassword)}>{showPassword ? "Hide" : "Show"}</button>
-              </div>
-              <div className="form-actions">
-                <label className="remember-me"><input type="checkbox" /><span>Remember me</span></label>
-                <a href="#" className="forgot-password">Forgot password?</a>
-              </div>
-              <button type="submit" className="submit-btn" disabled={loading}>{loading ? "Signing in..." : "Sign in"}</button>
-            </form>
-            <p className="no-account">Don't have an account? <strong style={{ cursor: "pointer" }} onClick={() => onNavigate("signup")}>Sign up</strong></p>
-          </div>
+            </div>
+
+            <div className="flex items-center justify-between text-sm">
+              <label className="flex items-center gap-2 text-slate-600 cursor-pointer">
+                <input type="checkbox" className="rounded border-slate-300" />
+                Remember me
+              </label>
+              <a href="#" className="text-blue-600 hover:underline">Forgot password?</a>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-2.5 bg-slate-900 text-white rounded-lg text-sm font-semibold hover:bg-slate-700 transition-colors disabled:opacity-50"
+            >
+              {loading ? 'Signing in…' : 'Sign In'}
+            </button>
+          </form>
+
+          <p className="mt-6 text-center text-sm text-slate-500">
+            Don&apos;t have an account?{' '}
+            <Link to="/signup" className="text-blue-600 font-medium hover:underline">
+              Sign up
+            </Link>
+          </p>
+
+          <footer className="mt-12 text-center text-xs text-slate-400">
+            <p className="mb-2">© 2026 AutoPart Management Systems.</p>
+            <div className="flex justify-center gap-4">
+              <a href="#" className="hover:text-slate-600">Privacy Policy</a>
+              <a href="#" className="hover:text-slate-600">Terms of Service</a>
+              <a href="#" className="hover:text-slate-600">Contact Support</a>
+            </div>
+          </footer>
         </div>
       </div>
-      <footer className="login-footer">
-        <p>2026 AutoPart Management Systems.</p>
-        <div className="footer-links">
-          <a href="#">Privacy Policy</a>
-          <a href="#">Terms of Service</a>
-          <a href="#">Contact Support</a>
-        </div>
-      </footer>
     </div>
-  );
+  )
 }
-
-export default Login;

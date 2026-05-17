@@ -1,4 +1,4 @@
-import api from '../../services/api'
+import api from './api'
 
 // POST /api/auth/login — returns { token, fullName, role, ... }
 export const login    = (data) => api.post('/api/auth/login', data)

@@ -40,19 +40,17 @@ export default function Inventory() {
 
   return (
     <div className="p-8">
-      {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Parts Inventory</h1>
           <p className="text-slate-500 text-sm mt-0.5">Manage vehicle parts stock and pricing</p>
         </div>
         <button onClick={() => setShowModal(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-slate-900 text-white rounded-lg text-sm font-semibold hover:bg-slate-700 transition-colors">
+          className="px-4 py-2 bg-slate-900 text-white rounded-lg text-sm font-semibold hover:bg-slate-700 transition-colors">
           + Add Part
         </button>
       </div>
 
-      {/* Stat Cards */}
       <div className="grid grid-cols-3 gap-4 mb-6">
         {[
           { label: 'TOTAL PARTS', value: parts.length },
@@ -68,7 +66,6 @@ export default function Inventory() {
 
       {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
 
-      {/* Table */}
       <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
         <div className="px-6 py-4 border-b border-slate-200">
           <h3 className="font-semibold text-slate-900">Parts List</h3>
@@ -96,32 +93,26 @@ export default function Inventory() {
                     <td className="px-6 py-4">
                       <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700">{p.category}</span>
                     </td>
-                    <td className="px-6 py-4 text-slate-800 font-semibold">${p.price?.toFixed(2)}</td>
+                    <td className="px-6 py-4 font-semibold text-slate-800">${p.price?.toFixed(2)}</td>
                     <td className="px-6 py-4">
                       <span className={`text-sm font-semibold ${p.isLowStock ? 'text-red-500' : 'text-green-600'}`}>
                         {p.stock}{p.isLowStock && ' ⚠ Low'}
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <button onClick={() => handleDelete(p.partID)}
-                        className="text-red-400 hover:text-red-600 text-xs font-semibold">Delete</button>
+                      <button onClick={() => handleDelete(p.partID)} className="text-red-400 hover:text-red-600 text-xs font-semibold">Delete</button>
                     </td>
                   </tr>
                 ))
             }
           </tbody>
         </table>
-        <div className="px-6 py-3 border-t border-slate-100 text-xs text-slate-400">
-          {parts.length} parts total
-        </div>
+        <div className="px-6 py-3 border-t border-slate-100 text-xs text-slate-400">{parts.length} parts total</div>
       </div>
 
-      {/* Add Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-slate-900/50 flex items-center justify-center z-50"
-          onClick={() => setShowModal(false)}>
-          <div className="bg-white rounded-2xl p-8 w-full max-w-lg shadow-xl"
-            onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-slate-900/50 flex items-center justify-center z-50" onClick={() => setShowModal(false)}>
+          <div className="bg-white rounded-2xl p-8 w-full max-w-lg shadow-xl" onClick={e => e.stopPropagation()}>
             <h2 className="text-xl font-bold text-slate-900 mb-5">Add New Part</h2>
             <form onSubmit={handleAdd} className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
@@ -159,11 +150,6 @@ export default function Inventory() {
                   <input required type="number" value={form.stock} onChange={e => setForm({...form, stock:e.target.value})}
                     className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
                 </div>
-              </div>
-              <div>
-                <label className="text-xs font-semibold text-slate-600 block mb-1">Description</label>
-                <input value={form.description} onChange={e => setForm({...form, description:e.target.value})}
-                  className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
               </div>
               <div className="flex justify-end gap-3 pt-2">
                 <button type="button" onClick={() => setShowModal(false)}

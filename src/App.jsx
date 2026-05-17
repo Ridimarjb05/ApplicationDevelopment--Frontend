@@ -1,20 +1,22 @@
-﻿import React, { useState } from "react";
-import Login from "./features/auth/Login";
-import Register from "./features/auth/Register";
-import PartsInventory from "./features/parts/PartsInventory";
+import { Routes, Route, Navigate } from 'react-router-dom'
+import Layout from './components/layout/Layout'
+import Inventory from './features/inventory/Inventory'
+
+function PrivateRoute({ children }) {
+  const token = localStorage.getItem('token')
+  return token ? children : <Navigate to="/login" replace />
+}
 
 function App() {
-  const [currentPage, setCurrentPage] = useState("login");
-  const navigate = (page) => setCurrentPage(page);
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("userName");
-    localStorage.removeItem("userRole");
-    setCurrentPage("login");
-  };
-  if (currentPage === "login") return <Login onNavigate={navigate} />;
-  if (currentPage === "signup") return <Register onNavigate={navigate} />;
-  if (currentPage === "dashboard" || currentPage === "inventory") return <PartsInventory onNavigate={navigate} onLogout={handleLogout} />;
-  return <Login onNavigate={navigate} />;
+  return (
+    <Routes>
+      <Route path="/" element={<PrivateRoute><Layout /></PrivateRoute>}>
+        <Route index element={<Navigate to="/inventory" replace />} />
+        <Route path="inventory" element={<Inventory />} />
+      </Route>
+      <Route path="*" element={<Navigate to="/inventory" replace />} />
+    </Routes>
+  )
 }
-export default App;
+
+export default App

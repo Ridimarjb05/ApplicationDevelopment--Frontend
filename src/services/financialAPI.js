@@ -1,4 +1,4 @@
-import api from '../../services/api'
+import api from './api'
 
 export const getFinancialSummary = () => api.get('/api/financial-report/summary')
 export const getMonthlyReport    = () => api.get('/api/financial-report/monthly')

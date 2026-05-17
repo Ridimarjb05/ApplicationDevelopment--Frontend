@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react'
-import { getFinancialSummary, getMonthlyReport, getTopParts } from './financialAPI'
+import { getFinancialSummary, getMonthlyReport, getTopParts } from '../../services/financialAPI'
 
 export default function FinancialReport() {
-  const [summary, setSummary] = useState(null)
-  const [monthly, setMonthly] = useState([])
+  const [summary, setSummary]   = useState(null)
+  const [monthly, setMonthly]   = useState([])
   const [topParts, setTopParts] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+  const [loading, setLoading]   = useState(true)
+  const [error, setError]       = useState('')
 
   useEffect(() => {
     async function load() {
@@ -30,7 +30,6 @@ export default function FinancialReport() {
         <p className="text-slate-500 text-sm mt-0.5">Revenue overview and top-selling parts</p>
       </div>
 
-      {/* Summary Cards */}
       {summary && (
         <div className="grid grid-cols-3 gap-4 mb-8">
           {[
@@ -47,7 +46,6 @@ export default function FinancialReport() {
       )}
 
       <div className="grid grid-cols-2 gap-6">
-        {/* Monthly Revenue */}
         <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
           <div className="px-6 py-4 border-b border-slate-200">
             <h3 className="font-semibold text-slate-900">Monthly Revenue</h3>
@@ -75,7 +73,6 @@ export default function FinancialReport() {
           </table>
         </div>
 
-        {/* Top Parts */}
         <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
           <div className="px-6 py-4 border-b border-slate-200">
             <h3 className="font-semibold text-slate-900">Top Selling Parts</h3>

@@ -1,12 +1,15 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Layout from "./components/layout/Layout";
+import PurchaseHistory from "./features/history/PurchaseHistory";
 
 export default function App() {
   return (
     <BrowserRouter>
-      <Layout>
-        <h1 className="text-2xl font-bold">Welcome to VehicleParts</h1>
-      </Layout>
+      <Routes>
+        <Route path="/" element={<Layout />}>
+          <Route path="customer/history" element={<PurchaseHistory />} />
+        </Route>
+      </Routes>
     </BrowserRouter>
   );
 }

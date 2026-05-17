@@ -1,12 +1,15 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Layout from "./components/layout/Layout";
+import { Routes, Route } from 'react-router-dom'
+import Layout from './components/layout/Layout'
+import StaffDirectory from './pages/staff/StaffDirectory'
 
-export default function App() {
+function App() {
   return (
-    <BrowserRouter>
-      <Layout>
-        <h1 className="text-2xl font-bold">Welcome to VehicleParts</h1>
-      </Layout>
-    </BrowserRouter>
-  );
+    <Routes>
+      <Route path="/" element={<Layout />}>
+        <Route path="staff" element={<StaffDirectory />} />
+      </Route>
+    </Routes>
+  )
 }
+
+export default App

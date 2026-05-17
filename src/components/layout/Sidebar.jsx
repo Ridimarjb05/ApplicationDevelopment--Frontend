@@ -2,9 +2,11 @@ import { Link, useLocation } from "react-router-dom";
 
 const customerNavItems = [
   { label: "Dashboard", path: "/" },
+  { label: "Register", path: "/register" },
   { label: "Appointments", path: "/customer/appointments" },
   { label: "Part Requests", path: "/customer/part-requests" },
   { label: "Reviews", path: "/customer/reviews" },
+  { label: "My Profile", path: "/customer/profile" },
 ];
 
 const staffNavItems = [

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { getAllParts, createPart, deletePart } from './inventoryAPI'
+import { getAllParts, createPart, deletePart } from '../../services/inventoryAPI'
 
 export default function Inventory() {
   const [parts, setParts]         = useState([])

@@ -1,4 +1,4 @@
-import api from '../../services/api'
+import api from './api'
 
 export const getAllParts  = ()        => api.get('/api/admin/parts')
 export const createPart  = (data)    => api.post('/api/admin/parts', data)

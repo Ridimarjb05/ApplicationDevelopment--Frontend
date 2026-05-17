@@ -1,12 +1,14 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Layout from "./components/layout/Layout";
+import { Routes, Route } from 'react-router-dom'
+import Login from './pages/auth/Login'
+import Signup from './pages/auth/Signup'
 
-export default function App() {
+function App() {
   return (
-    <BrowserRouter>
-      <Layout>
-        <h1 className="text-2xl font-bold">Welcome to VehicleParts</h1>
-      </Layout>
-    </BrowserRouter>
-  );
+    <Routes>
+      <Route path="/login"  element={<Login />} />
+      <Route path="/signup" element={<Signup />} />
+    </Routes>
+  )
 }
+
+export default App

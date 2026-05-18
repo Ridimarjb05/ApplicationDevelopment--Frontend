@@ -1,14 +1,12 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import Layout from './components/layout/Layout'
-import Placeholder from './pages/shared/Placeholder'
 
 // Auth
-import Login from './pages/auth/Login' 
+import Login  from './pages/auth/Login'
 import Signup from './pages/auth/Signup'
 
-
 // Admin
-// import FinancialReport from './pages/financial/FinancialReport'
+import FinancialReport from './pages/financial/FinancialReport'
 // import StaffDirectory  from './pages/staff/StaffDirectory'
 import NotificationsPage from './pages/admin/NotificationsPage'
 
@@ -17,7 +15,7 @@ import NotificationsPage from './pages/admin/NotificationsPage'
 // import InvoiceList      from './pages/invoices/InvoiceList'
 // import VendorList       from './pages/vendors/VendorList'
 // import RegisterCustomer from './pages/customers/RegisterCustomer'
-// import CreateInvoice    from './pages/staff/CreateInvoice'
+import CreateInvoice    from './pages/staff/CreateInvoice'
 import CustomerViewPage    from './pages/staff/CustomerViewPage'
 import CustomerReportsPage from './pages/staff/CustomerReportsPage'
 
@@ -28,27 +26,35 @@ import ReviewsPage      from './pages/customer/ReviewsPage'
 // import PurchaseHistory   from './pages/customer/PurchaseHistory'
 // import LoyaltyProgram    from './pages/customer/LoyaltyProgram'
 
+const ComingSoon = ({ name }) => (
+  <div className="flex items-center justify-center h-64">
+    <div className="text-center">
+      <p className="text-2xl font-bold text-gray-300">{name}</p>
+      <p className="text-gray-400 mt-2">This page is not built yet</p>
+    </div>
+  </div>
+)
+
 export default function App() {
   return (
     <Routes>
-      {/* Public */}
-      <Route path="/login" element={<Login />} />
+      <Route path="/login"  element={<Login />} />
       <Route path="/signup" element={<Signup />} />
-      {/* Protected shell */}
+
       <Route path="/" element={<Layout />}>
         <Route index element={<Navigate to="/admin/financial" replace />} />
 
         {/* Admin */}
-        <Route path="admin/financial"     element={<Placeholder name="Financial Report (F1)" />} />
-        <Route path="admin/staff"         element={<Placeholder name="Staff Management (F2)" />} />
+        <Route path="admin/financial"     element={<FinancialReport />} />
+        <Route path="admin/staff"         element={<ComingSoon name="Staff Management (F2)" />} />
         <Route path="admin/notifications" element={<NotificationsPage />} />
 
         {/* Staff */}
-        <Route path="staff/inventory"        element={<Placeholder name="Parts Inventory (F3)" />} />
-        <Route path="staff/invoices"         element={<Placeholder name="Purchase Invoices (F4)" />} />
-        <Route path="staff/vendors"          element={<Placeholder name="Vendor Management (F5)" />} />
-        <Route path="staff/customers"        element={<Placeholder name="Register Customer (F6)" />} />
-        <Route path="staff/sell"             element={<Placeholder name="Sell Parts / Invoice (F7)" />} />
+        <Route path="staff/inventory"        element={<ComingSoon name="Parts Inventory (F3)" />} />
+        <Route path="staff/invoices"         element={<ComingSoon name="Purchase Invoices (F4)" />} />
+        <Route path="staff/vendors"          element={<ComingSoon name="Vendor Management (F5)" />} />
+        <Route path="staff/customers"        element={<ComingSoon name="Register Customer (F6)" />} />
+        <Route path="staff/sell" element={<CreateInvoice />} />
         <Route path="staff/customer-view"    element={<CustomerViewPage />} />
         <Route path="staff/customer-reports" element={<CustomerReportsPage />} />
 
@@ -56,8 +62,8 @@ export default function App() {
         <Route path="customer/appointments"  element={<AppointmentsPage />} />
         <Route path="customer/part-requests" element={<PartRequestsPage />} />
         <Route path="customer/reviews"       element={<ReviewsPage />} />
-        <Route path="customer/history"       element={<Placeholder name="Purchase History (F14)" />} />
-        <Route path="customer/loyalty"       element={<Placeholder name="Loyalty Program (F16)" />} />
+        <Route path="customer/history"       element={<ComingSoon name="Purchase History (F14)" />} />
+        <Route path="customer/loyalty"       element={<ComingSoon name="Loyalty Program (F16)" />} />
       </Route>
     </Routes>
   )

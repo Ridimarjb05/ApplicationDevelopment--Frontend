@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Layout from "./components/layout/Layout";
-import LoyaltyProgram from "./features/loyalty/LoyaltyProgram";
+import LoyaltyProgram from "./pages/customer/LoyaltyProgram";
 
 export default function App() {
   return (

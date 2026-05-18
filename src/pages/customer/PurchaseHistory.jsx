@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { getFullHistory } from './historyAPI'
+import { getFullHistory } from '../../services/historyAPI'
 
 export default function PurchaseHistory() {
   const [customerId, setCustomerId] = useState('')

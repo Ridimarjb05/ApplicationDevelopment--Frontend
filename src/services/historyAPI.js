@@ -1,4 +1,4 @@
-import api from '../../services/api'
+import api from './api'
 
 // Get full history (purchases + services)
 export const getFullHistory = (customerId) => api.get(`/customerhistory/${customerId}`)

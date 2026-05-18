@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Layout from "./components/layout/Layout";
-import PurchaseHistory from "./features/history/PurchaseHistory";
+import PurchaseHistory from "./pages/customer/PurchaseHistory";
 
 export default function App() {
   return (

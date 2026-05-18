@@ -16,10 +16,15 @@ export default function Login() {
     setLoading(true)
     try {
       const res = await login({ email, password })
-      localStorage.setItem('token',    res.data.token)
-      localStorage.setItem('userName', res.data.fullName || res.data.email)
-      localStorage.setItem('userRole', res.data.role || 'staff')
-      navigate('/staff')
+      const role = res.data.role || 'Staff'
+      localStorage.setItem('token',      res.data.token)
+      localStorage.setItem('userName',   res.data.fullName || res.data.email)
+      localStorage.setItem('role',       role)
+      localStorage.setItem('customerId', res.data.customerId || '')
+
+      if (role === 'Admin')         navigate('/admin/financial')
+      else if (role === 'Staff')    navigate('/staff/customer-view')
+      else                          navigate('/customer/appointments')
     } catch (err) {
       setError(err.response?.data?.message || 'Invalid email or password.')
     } finally {

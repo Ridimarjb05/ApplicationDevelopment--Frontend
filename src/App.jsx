@@ -1,12 +1,15 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Layout from "./components/layout/Layout";
+import CreateInvoice from "./pages/staff/CreateInvoice";
 
 export default function App() {
   return (
     <BrowserRouter>
-      <Layout>
-        <h1 className="text-2xl font-bold">Welcome to VehicleParts</h1>
-      </Layout>
+      <Routes>
+        <Route path="/" element={<Layout />}>
+          <Route path="invoice/create" element={<CreateInvoice />} />
+        </Route>
+      </Routes>
     </BrowserRouter>
   );
 }

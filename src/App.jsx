@@ -12,7 +12,7 @@ import NotificationsPage from './pages/admin/NotificationsPage'
 
 // Staff
 // import Inventory        from './pages/inventory/Inventory'
-// import InvoiceList      from './pages/invoices/InvoiceList'
+import InvoiceList      from './pages/invoices/InvoiceList'
 // import VendorList       from './pages/vendors/VendorList'
 // import RegisterCustomer from './pages/customers/RegisterCustomer'
 import CreateInvoice    from './pages/staff/CreateInvoice'
@@ -51,7 +51,9 @@ export default function App() {
 
         {/* Staff */}
         <Route path="staff/inventory"        element={<ComingSoon name="Parts Inventory (F3)" />} />
-        <Route path="staff/invoices"         element={<ComingSoon name="Purchase Invoices (F4)" />} />
+        {/* F4 — Purchase Invoices */}
+        <Route path="staff/invoices"        element={<InvoiceList />} />
+        <Route path="staff/invoices/create" element={<CreateInvoice />} />
         <Route path="staff/vendors"          element={<ComingSoon name="Vendor Management (F5)" />} />
         <Route path="staff/customers"        element={<ComingSoon name="Register Customer (F6)" />} />
         <Route path="staff/sell" element={<CreateInvoice />} />

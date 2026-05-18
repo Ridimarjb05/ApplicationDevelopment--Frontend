@@ -5,6 +5,7 @@ const navItems = [
   { label: "Appointments", path: "/customer/appointments" },
   { label: "Part Requests", path: "/customer/part-requests" },
   { label: "Reviews", path: "/customer/reviews" },
+  { label: "Loyalty Program", path: "/customer/loyalty" },
 ];
 
 export default function Sidebar() {

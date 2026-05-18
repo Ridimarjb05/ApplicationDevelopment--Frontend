@@ -9,6 +9,7 @@ const customerNavItems = [
 
 const staffNavItems = [
   { label: "Search Customers", path: "/staff/customers" },
+  { label: "Send Invoice", path: "/staff/send-invoice" },
 ];
 
 export default function Sidebar() {

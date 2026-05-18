@@ -23,8 +23,8 @@ import CustomerReportsPage from './pages/staff/CustomerReportsPage'
 import AppointmentsPage from './pages/customer/AppointmentsPage'
 import PartRequestsPage from './pages/customer/PartRequestsPage'
 import ReviewsPage      from './pages/customer/ReviewsPage'
-// import PurchaseHistory   from './pages/customer/PurchaseHistory'
-// import LoyaltyProgram    from './pages/customer/LoyaltyProgram'
+import PurchaseHistory   from './pages/customer/PurchaseHistory'
+import LoyaltyProgram    from './pages/customer/LoyaltyProgram'
 
 const ComingSoon = ({ name }) => (
   <div className="flex items-center justify-center h-64">
@@ -62,8 +62,9 @@ export default function App() {
         <Route path="customer/appointments"  element={<AppointmentsPage />} />
         <Route path="customer/part-requests" element={<PartRequestsPage />} />
         <Route path="customer/reviews"       element={<ReviewsPage />} />
-        <Route path="customer/history"       element={<ComingSoon name="Purchase History (F14)" />} />
-        <Route path="customer/loyalty"       element={<ComingSoon name="Loyalty Program (F16)" />} />
+      n <Route path="customer/history" element={<PurchaseHistory />} />
+        <Route path="customer/loyalty" element={<LoyaltyProgram />} />
+
       </Route>
     </Routes>
   )

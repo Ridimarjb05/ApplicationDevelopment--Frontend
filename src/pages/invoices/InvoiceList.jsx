@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import api from '../../api/axios'
+import api from '../../services/api'
 
 export default function InvoiceList() {
   const [invoices, setInvoices] = useState([])

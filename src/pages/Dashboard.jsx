@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import api from '../api/axios'
+import api from '../services/api'
 
 const C = {
   card: { background: '#fff', borderRadius: '12px', border: '1px solid #e8ecf0', padding: '20px' },

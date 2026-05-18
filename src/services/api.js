@@ -1,10 +1,26 @@
-import axios from "axios";
+import axios from 'axios'
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:5046/api",
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
+  baseURL: 'http://localhost:5213',
+  headers: { 'Content-Type': 'application/json' },
+})
 
-export default api;
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token')
+  if (token) config.headers.Authorization = `Bearer ${token}`
+  return config
+})
+
+api.interceptors.response.use(
+  (res) => res,
+  (err) => {
+    if (err.response?.status === 401) {
+      localStorage.removeItem('token')
+      localStorage.removeItem('userName')
+      window.location.href = '/login'
+    }
+    return Promise.reject(err)
+  }
+)
+
+export default api

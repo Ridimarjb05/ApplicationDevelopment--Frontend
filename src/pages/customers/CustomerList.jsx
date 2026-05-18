@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import api from '../../api/axios'
+import api from '../../services/api'
 
 const COLORS = ['#3b82f6','#8b5cf6','#10b981','#f59e0b','#ef4444','#06b6d4','#ec4899']
 const BGTONES = ['#eff6ff','#f5f3ff','#ecfdf5','#fffbeb','#fef2f2','#ecfeff','#fdf2f8']

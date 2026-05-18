@@ -1,4 +1,4 @@
-import api from '../../services/api'
+import api from './api'
 
 // Create a new sale invoice
 export const createInvoice = (data) => api.post('/invoice', data)

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { createInvoice } from './invoiceAPI'
+import { createInvoice } from '../../services/invoiceAPI'
 
 const EMPTY_ITEM = { partID: '', quantity: 1 }
 

@@ -3,7 +3,9 @@ import Layout from './components/layout/Layout'
 import Placeholder from './pages/shared/Placeholder'
 
 // Auth
-// import Login from './pages/auth/Login'  // uncomment after merging Ankit's login branch
+import Login from './pages/auth/Login' 
+import Signup from './pages/auth/Signup'
+
 
 // Admin
 // import FinancialReport from './pages/financial/FinancialReport'
@@ -30,8 +32,8 @@ export default function App() {
   return (
     <Routes>
       {/* Public */}
-      <Route path="/login" element={<Placeholder name="Login" />} />
-
+      <Route path="/login" element={<Login />} />
+      <Route path="/signup" element={<Signup />} />
       {/* Protected shell */}
       <Route path="/" element={<Layout />}>
         <Route index element={<Navigate to="/admin/financial" replace />} />

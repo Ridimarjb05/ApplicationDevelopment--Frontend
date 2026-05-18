@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { getLoyaltySummary, checkDiscountEligibility } from './loyaltyAPI'
+import { getLoyaltySummary, checkDiscountEligibility } from '../../services/loyaltyAPI'
 
 export default function LoyaltyProgram() {
   const [customerId, setCustomerId] = useState('')

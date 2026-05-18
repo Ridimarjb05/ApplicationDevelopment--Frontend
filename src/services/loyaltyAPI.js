@@ -1,4 +1,4 @@
-import api from '../../services/api'
+import api from './api'
 
 // Get loyalty summary for a customer
 export const getLoyaltySummary = (customerId) => api.get(`/loyalty/${customerId}`)

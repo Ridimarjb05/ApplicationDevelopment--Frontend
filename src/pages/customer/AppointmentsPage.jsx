@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { bookAppointment, getAppointments } from "../../services/f13Service";
 import { getCurrentCustomerId } from "../../services/auth";
 
 export default function AppointmentsPage() {
+  const navigate = useNavigate();
   const customerId = getCurrentCustomerId();
 
   const [appointments, setAppointments] = useState([]);
@@ -19,8 +21,17 @@ export default function AppointmentsPage() {
     serviceDescription: "",
   });
 
+  // Guard: if no customerId, the session is stale — force re-login
+  useEffect(() => {
+    if (!customerId) {
+      localStorage.clear();
+      navigate("/login");
+    }
+  }, []);
+
   // Load this customer's appointments.
   const loadAppointments = async () => {
+    if (!customerId) return;
     setLoading(true);
     setError("");
     try {
@@ -34,7 +45,7 @@ export default function AppointmentsPage() {
   };
 
   useEffect(() => {
-    loadAppointments();
+    if (customerId) loadAppointments();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

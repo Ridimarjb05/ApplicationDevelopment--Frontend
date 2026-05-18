@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { submitReview, getReviews } from "../../services/f13Service";
 import { getCurrentCustomerId } from "../../services/auth";
 
 export default function ReviewsPage() {
+  const navigate = useNavigate();
   const customerId = getCurrentCustomerId();
 
   const [reviews, setReviews] = useState([]);
@@ -17,7 +19,16 @@ export default function ReviewsPage() {
     comment: "",
   });
 
+  // Guard: if no customerId, session is stale — force re-login
+  useEffect(() => {
+    if (!customerId) {
+      localStorage.clear();
+      navigate("/login");
+    }
+  }, []);
+
   const loadReviews = async () => {
+    if (!customerId) return;
     setLoading(true);
     setError("");
     try {
@@ -31,7 +42,7 @@ export default function ReviewsPage() {
   };
 
   useEffect(() => {
-    loadReviews();
+    if (customerId) loadReviews();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

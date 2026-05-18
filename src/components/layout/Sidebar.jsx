@@ -1,5 +1,5 @@
-import { NavLink, useNavigate } from 'react-router-dom'
-import { getUserName, logout } from '../../services/auth'
+import { NavLink } from 'react-router-dom'
+import { getUserName, getRole, logout } from '../../services/auth'
 
 const adminLinks = [
   { label: 'Financial Report',  path: '/admin/financial'     },  // F1
@@ -26,6 +26,8 @@ const customerLinks = [
 ]
 
 function NavGroup({ title, links }) {
+  if (links.length === 0) return null
+  
   return (
     <div className="mb-4">
       <p className="px-6 py-2 text-xs text-gray-500 uppercase tracking-wider">{title}</p>
@@ -50,6 +52,23 @@ function NavGroup({ title, links }) {
 
 export default function Sidebar() {
   const userName = getUserName() || 'User'
+  const role = getRole() || ''
+
+  // Filter links based on the authenticated user's role
+  const showAdminSection = role === 'Admin'
+  const showCustomerSection = role === 'Customer'
+
+  // Admin manages Parts, Invoices, and Vendors (back-office)
+  // Staff manages registering customers, selling, and customer view/reports
+  const filteredStaffLinks = staffLinks.filter(link => {
+    if (role === 'Admin') {
+      return ['Parts Inventory', 'Purchase Invoices', 'Vendor Management'].includes(link.label)
+    }
+    if (role === 'Staff') {
+      return ['Register Customer', 'Sell Parts', 'Customer View', 'Customer Reports'].includes(link.label)
+    }
+    return false
+  })
 
   return (
     <div className="w-56 min-h-screen bg-gray-900 flex flex-col py-6">
@@ -58,13 +77,14 @@ export default function Sidebar() {
       </div>
 
       <nav className="flex-1 overflow-y-auto">
-        <NavGroup title="Admin"    links={adminLinks}    />
-        <NavGroup title="Staff"    links={staffLinks}    />
-        <NavGroup title="Customer" links={customerLinks} />
+        {showAdminSection && <NavGroup title="Admin" links={adminLinks} />}
+        <NavGroup title="Staff" links={filteredStaffLinks} />
+        {showCustomerSection && <NavGroup title="Customer" links={customerLinks} />}
       </nav>
 
       <div className="px-6 pt-4 border-t border-gray-700">
-        <p className="text-gray-400 text-xs mb-3 truncate">{userName}</p>
+        <p className="text-gray-400 text-xs mb-1 truncate">{userName}</p>
+        <p className="text-gray-500 text-[10px] uppercase font-bold tracking-wider mb-3">{role}</p>
         <button
           onClick={logout}
           className="text-xs text-red-400 hover:text-red-300 transition-colors"

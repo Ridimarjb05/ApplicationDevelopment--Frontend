@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { requestPart, getPartRequests } from "../../services/f13Service";
 import { getCurrentCustomerId } from "../../services/auth";
 
 export default function PartRequestsPage() {
+  const navigate = useNavigate();
   const customerId = getCurrentCustomerId();
 
   const [requests, setRequests] = useState([]);
@@ -17,7 +19,16 @@ export default function PartRequestsPage() {
     notes: "",
   });
 
+  // Guard: if no customerId, session is stale — force re-login
+  useEffect(() => {
+    if (!customerId) {
+      localStorage.clear();
+      navigate("/login");
+    }
+  }, []);
+
   const loadRequests = async () => {
+    if (!customerId) return;
     setLoading(true);
     setError("");
     try {
@@ -31,7 +42,7 @@ export default function PartRequestsPage() {
   };
 
   useEffect(() => {
-    loadRequests();
+    if (customerId) loadRequests();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

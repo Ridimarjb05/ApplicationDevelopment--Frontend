@@ -8,11 +8,13 @@ import Signup from './pages/auth/Signup'
 // Admin
 import FinancialReport from './pages/financial/FinancialReport'
 import NotificationsPage from './pages/admin/NotificationsPage'
+import StaffDirectory from './pages/staff/StaffDirectory'
 
 // Staff
 import CreateInvoice    from './pages/staff/CreateInvoice'          // F7 — sell parts
 import CustomerViewPage    from './pages/staff/CustomerViewPage'
 import CustomerReportsPage from './pages/staff/CustomerReportsPage'
+import Inventory           from './pages/inventory/Inventory'
 
 // F4 — Purchase Invoices
 import InvoiceList          from './pages/invoices/InvoiceList'
@@ -54,11 +56,11 @@ export default function App() {
 
         {/* Admin */}
         <Route path="admin/financial"     element={<FinancialReport />} />
-        <Route path="admin/staff"         element={<ComingSoon name="Staff Management (F2)" />} />
+        <Route path="admin/staff"         element={<StaffDirectory />} />
         <Route path="admin/notifications" element={<NotificationsPage />} />
 
         {/* Staff */}
-        <Route path="staff/inventory"        element={<ComingSoon name="Parts Inventory (F3)" />} />
+        <Route path="staff/inventory"        element={<Inventory />} />
 
         {/* F4 — Purchase Invoices */}
         <Route path="staff/invoices"         element={<InvoiceList />} />
